@@ -1,0 +1,2364 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>2025 셀프 견적 (단일 파일 · var 버전 v61)</title>
+<style>
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;color:#111827}
+  header{padding:12px 16px;border-bottom:1px solid #e5e7eb;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  header h1{font-size:16px;margin:0}
+  .muted{color:#6b7280;font-size:12px}
+  
+  .activeRow{background:#f3f4f6}
+  .clickRow{cursor:pointer}
+.wrap{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 58px)}
+  aside{border-right:1px solid #e5e7eb;padding:12px;overflow:auto}
+  main{padding:12px;overflow:auto}
+  .label{font-size:12px;color:#374151;margin:12px 0 6px}
+  input{width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;box-sizing:border-box}
+  .tabs{display:flex;flex-direction:column;gap:6px}
+  .tabbtn{border:1px solid #e5e7eb;background:#fff;border-radius:10px;padding:10px;text-align:left;cursor:pointer}
+  .tabbtn.active{border-color:#111827}
+  .listbtn{border:1px solid #e5e7eb;background:#fff;border-radius:10px;padding:10px;text-align:left;cursor:pointer}
+  .listbtn.active{border-color:#111827}
+  .listbtn.done{background:#ecfdf5;border-color:#10b981}
+  .groupTitle{margin-top:10px;padding:6px 8px;border-radius:10px;background:#f9fafb;border:1px solid #e5e7eb;font-size:12px;color:#374151}
+  .card{border:1px solid #e5e7eb;border-radius:14px;padding:12px}
+  .grid2{display:grid;grid-template-columns:1.6fr 1fr;gap:12px}
+  table{border-collapse:collapse;width:100%}
+  th,td{border:1px solid #e5e7eb;padding:8px 10px;font-size:13px;vertical-align:top}
+  th{background:#f9fafb;text-align:left}
+  tr:hover td{background:#f8fafc}
+  .num{text-align:right}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  button{padding:10px 12px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
+  .pill{border:1px solid #e5e7eb;border-radius:999px;padding:8px 10px;font-size:13px}
+  .note{background:#f9fafb;border:1px dashed #e5e7eb;border-radius:12px;padding:10px;font-size:12px;color:#374151}
+  .hidden{display:none !important}
+
+  .readonly{background:#f7f7f7;}
+
+  /* qtyLocked(읽기전용) 입력 스타일 */
+  input.readonly{ background:#f5f5f5; cursor:not-allowed; }
+
+  /* ===== UI 개선(v63) : PC 가독성/관리 ===== */
+  .stickySummary{ position:sticky; top:0; z-index:20; background:#fff; padding-bottom:10px; }
+  .pickedListWrap{ max-height:48vh; overflow:auto; border:1px solid #e5e7eb; border-radius:12px; }
+  .pickedListWrap table{ border-collapse:collapse; width:100%; }
+  .pickedListWrap th,.pickedListWrap td{ border:1px solid #e5e7eb; padding:8px 10px; font-size:13px; vertical-align:top; }
+  .pickedListWrap th{ position:sticky; top:0; background:#f9fafb; z-index:1; }
+  .pickedListWrap input[type="text"]{ width:110px; padding:8px; border-radius:10px; }
+  .btnDanger{ border-color:#fecaca; background:#fff; }
+  .btnDanger:hover{ background:#fff1f2; }
+  .badge{ display:inline-block; padding:3px 8px; border-radius:999px; border:1px solid #e5e7eb; font-size:12px; color:#374151; background:#fff; }
+
+
+  /* ===== 전체 확인(오버뷰) 모달 ===== */
+  .ovl{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999}
+  .ovl.hidden{display:none !important}
+  .ovCard{width:min(1100px, calc(100vw - 24px));max-height:calc(100vh - 24px);background:#fff;border-radius:16px;border:1px solid #e5e7eb;box-shadow:0 20px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden}
+  .ovHead{padding:12px 14px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .ovHead .title{font-weight:800}
+  .ovBody{padding:12px 14px;overflow:auto}
+  .ovActions{display:flex;gap:8px;flex-wrap:wrap}
+  .ovTable th,.ovTable td{font-size:12.5px}
+  .ovBadge{background:#f9fafb;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;font-size:12px;color:#374151}
+  .ovGroup{background:#f3f4f6;font-weight:700}
+  .ovSub{background:#fafafa;font-weight:700}
+
+</style>
+
+<meta name="theme-color" content="#111827"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+
+</head>
+<body>
+<header>
+  <h1>2025 셀프 견적 (더블클릭 실행 · var 버전 v61)</h1>
+  <span class="muted">• 싱크대: “기존(옵션 먼저 선택)” + “싱크대 세부(상부장/하부장/대리석/옵션)” 함께 표시 • 검색 정상 동작 • 수량 step=0.001</span>
+</header>
+
+<div class="wrap">
+  <aside>
+    <div class="label">대분류(시트)</div>
+    <div id="tabs" class="tabs"></div>
+
+    <div class="label">중분류</div>
+    <div id="sections"></div>
+
+    <div class="label">검색(중분류/소분류)</div>
+    <input id="q" placeholder="예: 대리석, 상부장, 입수전, 기타..." />
+
+    <div class="label">작업</div>
+    <div class="row">
+      <button id="btnResetSheet">이 시트 입력 초기화</button>
+      <button id="btnResetAll">전체 초기화</button>
+      <button id="btnOverview">전체 확인</button>
+    </div>
+
+    <div class="muted" style="margin-top:10px">
+      * 저장은 이 PC/브라우저(localStorage)에 자동 반영됩니다.
+    </div>
+  </aside>
+
+  <main>
+    <div class="stickySummary">
+      <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <div class="muted">현재 대분류</div>
+          <div id="curSheet" style="font-weight:700"></div>
+        </div>
+        <div class="row">
+          <div class="pill">시트 합계: <b id="sheetTotal">0</b></div>
+          <div class="pill">전체 합계: <b id="grandTotal">0</b></div>
+        </div>
+      </div>
+    </div>
+
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="muted">현재 중분류</div>
+        <div id="curSection" style="font-weight:700;margin-bottom:10px"></div>
+
+        <div id="optionsArea">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:54px">선택</th>
+                <th>소분류(옵션)</th>
+                <th id="priceHeader" class="num" style="width:160px">단가</th>
+              </tr>
+            </thead>
+            <tbody id="optionsBody"></tbody>
+          </table>
+        </div>
+
+        <div id="manualHint" class="note hidden">
+          현재 선택은 <b>단가 직접 입력</b>이 필요한 항목입니다. 오른쪽에서 단가/수량을 입력하세요.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="muted">선택 결과</div>
+        <div id="picked" style="font-weight:700;margin:6px 0 10px">-</div>
+
+        
+        <div class="muted" style="margin:0 0 10px">선택한 항목은 아래 목록에서 수량을 직접 수정/삭제하세요.</div>
+<div id="singleEditHidden" style="display:none">
+<div id="editPickWrap" class="row hidden" style="gap:8px;align-items:center;margin:0 0 10px">
+          <div class="muted" style="min-width:64px">편집 대상</div>
+          <select id="editPickSelect" style="flex:1;padding:8px 10px;border:1px solid #e5e7eb;border-radius:10px"></select>
+        </div>
+<div class="label">단가</div>
+        <div id="unitModeFixed" class="pill"><b id="unitPrice">0</b> 원</div>
+        <input id="unitInput" type="number" min="0" step="100" placeholder="단가를 입력" class="hidden" />
+
+        <div class="label">수량(입력)</div>
+        <input id="qty" type="text" inputmode="decimal" autocomplete="off" placeholder="예: 2.345" />
+
+        <div class="label">금액</div>
+        <div class="pill"><b id="amount">0</b> 원</div>
+
+        
+</div>
+<div class="row" style="margin-top:12px">
+          <button id="btnClearPick">이 중분류 선택/입력 해제</button>
+        </div>
+
+        <div style="height:14px"></div>
+
+        <div class="row" style="justify-content:space-between;align-items:flex-end">
+          <div>
+            <div class="muted">선택 목록(이 시트)</div>
+            <div class="muted" style="margin-top:4px">라인별 수량을 여기서 바로 수정/삭제할 수 있습니다.</div>
+          </div>
+          <span id="pickedListCount" class="badge">0개</span>
+        </div>
+
+        <div style="height:8px"></div>
+        <div class="pickedListWrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:120px">중분류</th>
+                <th>선택 항목</th>
+                <th class="num" style="width:110px">단가</th>
+                <th style="width:140px">수량</th>
+                <th class="num" style="width:120px">금액</th>
+                <th style="width:72px">삭제</th>
+              </tr>
+            </thead>
+            <tbody id="pickedListBody"></tbody>
+          </table>
+        </div>
+
+        <div class="row" style="margin-top:10px;justify-content:space-between">
+          <button id="btnClearSheetPicks" class="btnDanger">이 시트 선택 전체 해제</button>
+          <span class="muted">* 합계 제외 섹션(예: 싱크대 기준/기존)은 목록에서도 숨깁니다.</span>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+
+/* ============================================================
+   2025 셀프 견적 (단일 HTML) - var 버전 v39
+   ------------------------------------------------------------
+   구조 요약
+   1) 데이터: 엑셀에서 추출한 항목을 state.sectionsCache(중분류/소분류)로 보관
+   2) 선택값: state.saved[대분류][중분류] = {name, unit, qty, qtyRaw, manual}
+   3) 화면
+      - 좌측: 대분류 / 중분류 버튼(2그룹: 기존, 싱크대 세부)
+      - 중앙: 소분류(옵션) 리스트
+      - 우측: 선택 결과(단가/수량/금액) 입력/표시
+   4) 계산
+      - 일반: 금액 = 단가(unit) × 수량(qty)
+      - 수동(기타): 단가를 사용자가 입력
+      - 연동(예: 상부장>주방 후드): 단가 = (기존 화면의 단가×기존 수량)
+   ============================================================ */
+// =============================================================
+//  2025 셀프 견적 (단일 HTML)
+//  - 엑셀 내용을 BOOK(JSON)으로 내장
+//  - 좌측: 대분류(시트) / 중분류 목록(검색)
+//  - 중앙: 소분류 선택
+//  - 우측: 단가/수량/금액 및 합계(localStorage 저장)
+//  - 싱크대 시트는 2그룹(기존/싱크대 세부)
+// =============================================================
+var BOOK = {"title": "2025 셀프 견적", "sheets": [{"name": "싱크대", "rows": [["셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기"], [null, null, null, null, null, null, null, null, null, null], ["품 목", "옵션 먼저 선택", "옵션 먼저 선택", "옵션 먼저 선택", "종 류", "규 격", "길 이", "단 가", "입력란", "금 액"], ["싱크대", "대리석 상판", "단가 (자동입력)", "택 1", "상부장", "깊이 320 이하", "몇 미터?\n(ㄱ자는 코너포함)", 190000, 2.3, "=SUM(H4*I4)"], ["싱크대", "엘지", 190000, null, "상부장", "깊이 321 이상", "몇 미터?\n(ㄱ자는 코너포함)", 228000, null, "=SUM(H5*I5)"], ["싱크대", "현대 ", 180000, null, "상부장", "높이 800~1000", "길이 한번 더 입력", 20000, null, "=SUM(H6*I6)"], ["싱크대", "트라이스톤", 170000, 1, "상부장", "측면 EP ", "수량", 30000, null, "=SUM(H7*I7)"], ["싱크대", "엘지 오로라", 250000, null, "상부장", "주방 후드", "옵션 선택", "=SUM(C25*D25+C26*D26+C27*D27+C28*D28+C29*D29+C30*D30+C31*D31+C32*D32+C33*D33)", null, "=SUM(H8*I8)"], ["싱크대", "현대 케스케이드", 220000, null, "하부장\n(아일랜드)", "깊이 700 이하", "몇 미터?\n(ㄱ자는 코너 600 제외)", 190000, 2.3, "=SUM(H9*I9)"], ["싱크대", "기타 상판", null, null, "하부장\n(아일랜드)", "깊이 701 이상", "몇 미터?\n(ㄱ자는 코너 600 제외)", 228000, null, "=SUM(H10*I10)"], ["싱크대", null, null, null, "하부장\n(아일랜드)", "높이 800~1000", "길이 한번 더 입력", 20000, null, "=SUM(H11*I11)"], ["싱크대", "입수전", "단가 (자동입력)", "택 1", "대리석", "대리석 (~700폭)", "옵션 선택\n(ㄱ자는 코너 600 제외)", "=SUM(C5*D5+C6*D6+C7*D7+C8*D8+C9*D9+C10*D10)", 2.3, "=SUM(H12*I12)"], ["싱크대", "하츠 기본", 70000, null, "대리석", "대리석 (700~900폭)", "옵션 선택\n(ㄱ자는 코너 600 제외)", "=SUM(H12*1.5)", null, "=SUM(H13*I13)"], ["싱크대", "디자인 수전", 120000, 1, "옵션\n(하부장)", "측, 후면 EP", "하부 EP (~700)", 50000, 1, "=SUM(H14*I14)"], ["싱크대", null, null, null, "옵션\n(하부장)", "측, 후면 EP", "하부 EP (701~1200)", 100000, null, "=SUM(H15*I15)"], ["싱크대", "백조 볼", "단가 (자동입력)", "택 1", "옵션\n(하부장)", "측, 후면 EP", "하부 EP (1200~2400)", 150000, null, "=SUM(H16*I16)"], ["싱크대", "기본 점보, 포켓볼", 70000, 1, "옵션\n(하부장)", "측, 후면 EP", "통 EP (~730)", 100000, 3, "=SUM(H17*I17)"], ["싱크대", "SQSR 780", 300000, null, "옵션\n(하부장)", "측, 후면 EP", "통 EP (731~850)", 130000, null, "=SUM(H18*I18)"], ["싱크대", "백조 엠보콰이어트", 290000, null, "옵션\n(하부장)", "측, 후면 EP", "통 EP (851~1200)", 160000, null, "=SUM(H19*I19)"], ["싱크대", "그랜드 860", 210000, null, "옵션\n(하부장)", "개수대 볼 종류", "옵션 선택", "=SUM(C17*D17+C18*D18+C19*D19+C20*D20+C21*D21+C22*D22)", 1, "=SUM(H20*I20)"], ["싱크대", "깜뽀르떼 860", 420000, null, "옵션\n(하부장)", "입수전", "옵션 선택", "=SUM(C13*D13+C14*D14)", 1, "=SUM(H21*I21)"], ["싱크대", "기타 볼", null, null, "옵션\n(하부장)", "개수대 볼 타공비", "수량", 50000, 1, "=SUM(H22*I22)"], ["싱크대", null, null, null, "옵션\n(하부장)", "거실 보는 코너장", "수량", 50000, null, "=SUM(H23*I23)"], ["싱크대", "주방 후드", "단가 (자동입력)", "택 1", "옵션\n(하부장)", "마감재 렌지장", "수량", 50000, null, "=SUM(H24*I24)"], ["싱크대", "하이드 일반", 90000, null, "옵션\n(하부장)", "마감재 밥통장", "수량", 70000, null, "=SUM(H25*I25)"], ["싱크대", "하이드 댐퍼", 120000, null, "옵션\n(하부장)", "언더레일 양념 망장", "수량", 60000, null, "=SUM(H26*I26)"], ["싱크대", "슬라이드 일반", 70000, null, "옵션\n(하부장)", "알루미늄 수저 트레이", "수량", 70000, 1, "=SUM(H27*I27)"], ["싱크대", "슬라이드 투 모터", 100000, null, "옵션\n(하부장)", "하츠 절수 패달", "수량", 180000, null, "=SUM(H28*I28)"], ["싱크대", "하츠 뉴침니", 300000, null, "옵션\n(하부장)", "올 스텐 배수구", "수량", 60000, null, "=SUM(H29*I29)"], ["싱크대", "하츠 로빈", 350000, null, "옵션\n(하부장)", "댐핑 볼레일 서랍", "수량", 20000, null, "=SUM(H30*I30)"], ["싱크대", "하츠 스퀘어 실버", 510000, null, "옵션\n(하부장)", "언더레일 서랍", "수량", 40000, null, "=SUM(H31*I31)"], ["싱크대", "하츠 스퀘어 화이트", 540000, null, "옵션\n(하부장)", "하츠 시스템 서랍", "수량", 50000, 1, "=SUM(H32*I32)"], ["싱크대", "기타 후드", null, null, "옵션\n(하부장)", "블럼 인티보 서랍", "고하중 대서랍", 199100, null, "=SUM(H33*I33)"], ["싱크대", null, null, null, "옵션\n(하부장)", "블럼 인티보 서랍", "고하중 중서랍", 143000, null, "=SUM(H34*I34)"], ["싱크대", "손잡이 ", "단가 (자동입력)", "택 1", "옵션\n(하부장)", "블럼 인티보 서랍", "대서랍", 171600, null, "=SUM(H35*I35)"], ["싱크대", "무소음 똑딱이", 7000, 1, "옵션\n(하부장)", "블럼 인티보 서랍", "중서랍", 115500, null, "=SUM(H36*I36)"], ["싱크대", "기타 손잡이", null, null, "옵션\n(하부장)", "블럼 인티보 서랍", "소서랍", 107800, null, "=SUM(H37*I37)"], ["싱크대", null, null, null, "옵션\n(하부장)", "블럼 인티보 서랍", "속서랍", 154000, null, "=SUM(H38*I38)"], ["싱크대", null, null, null, "옵션\n(하부장)", "손잡이 ", "옵션 선택", "=SUM(C36*D36+C37*D37)", null, "=SUM(H39*I39)"], ["싱크대", null, null, null, "옵션\n(하부장)", "기타", "단가 직접 입력", null, null, "=SUM(H40*I40)"], ["총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "=SUM(J4:J40)"]]}, {"name": "냉장고, 가전 키큰장", "rows": [["셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기"], [null, null, null, null, null, null, null], ["품 목", "종 류", "규 격", "길 이", "단 가", "입력란", "금 액"], ["냉장고장", "상부장", "가로 899 이하", "몇 통 ?", 160000, null, "=SUM(E4*F4)"], ["냉장고장", "상부장", "가로 900~1000", "몇 통 ?", 190000, 2, "=SUM(E5*F5)"], ["냉장고장", "상부장", "뒤쪽 뜨는 공간", "바디 컬러로 커버", 30000, 1, "=SUM(E6*F6)"], ["냉장고장", "공통 (선택)", "측면 통 EP (~730)", "수량", 100000, null, "=SUM(E7*F7)"], ["냉장고장", "공통 (선택)", "측면 통 EP (731~850)", "수량", 130000, null, "=SUM(E8*F8)"], ["냉장고장", "공통 (선택)", "측면 통 EP (851~1200)", "수량", 160000, null, "=SUM(E9*F9)"], ["냉장고장", "공통 (선택)", "상부장 밑판 통 EP", "수량", 100000, null, "=SUM(E10*F10)"], [null, null, null, null, null, null, null], ["가전 수납장", "가로 ~700이하", "렌지, 밥통 프레임 부착", "수량", 400000, null, "=SUM(E12*F12)"], ["가전 수납장", "가로 ~700이하", "렌지, 밥통 마감재 제작", "수량", 80000, null, "=SUM(E13*F13)"], [null, null, null, null, null, null, null], ["주방 수납장", "깊이 ~600이하", "자당 단가", "몇 자 ?", 140000, 2.81, "=SUM(E15*F15)"], ["주방 수납장", "하츠 팬트리", "450용 4단", "수량", 440000, null, "=SUM(E16*F16)"], ["주방 수납장", "하츠 팬트리", "600용 6단", "수량", 570000, null, "=SUM(E17*F17)"], ["주방 수납장", "비 브랜드", "450용 4단", "수량", 420000, null, "=SUM(E18*F18)"], ["주방 수납장", "비 브랜드", "600용 6단", "수량", 480000, null, "=SUM(E19*F19)"], [null, null, null, null, null, null, null], ["홈바장", "깊이 ~600이하", "자당 단가", "몇 자 ?", 130000, null, "=SUM(E21*F21)"], ["홈바장", "마감재장 (추가)", "높이 600이하", "수량", 170000, null, "=SUM(E22*F22)"], ["홈바장", "마감재장 (추가)", "높이 601이상", "수량", 230000, null, "=SUM(E23*F23)"], ["홈바장", "마감재장 (추가)", "홈바 내부 선반 ", "수량", 50000, null, "=SUM(E24*F24)"], ["홈바장", "마감재장 (추가)", "홈바 내부 상부장", "몇 미터 ?", 190000, null, "=SUM(E25*F25)"], [null, null, null, null, null, null, null], ["냉장고 홈바장", "손잡이 높이 맞춤", "상부, 중간", "수량", 40000, null, "=SUM(E27*F27)"], ["손잡이 ", "무소음 똑딱이", "EA", "수량", 7000, 2, "=SUM(E28*F28)"], [null, null, null, null, null, null, null], ["총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "=SUM(G4:G10,G12:G13,G15:G19,G21:G25,G27:G28)"]]}, {"name": "붙박이,신발장", "rows": [["셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기"], [null, null, null, null, null, null, null], ["품 목", "종 류", "규 격", "길 이", "단 가", "입력란", "금 액"], ["붙박이장", "여닫이", "깊이 ~ 600 이하", "몇 자 ?", 130000, null, "=SUM(E4*F4)"], ["붙박이장", "여닫이", "깊이 ~ 601 이상", "몇 자 ?", 163000, null, "=SUM(E5*F5)"], ["붙박이장", "여닫이", "내부 서랍 추가", "수량", 40000, null, "=SUM(E6*F6)"], ["붙박이장", "여닫이", "겉 서랍 추가", "수량", 50000, null, "=SUM(E7*F7)"], ["붙박이장", "슬라이딩", "깊이 ~ 600 이하", "몇 자 ?", 150000, null, "=SUM(E8*F8)"], ["붙박이장", "슬라이딩", "깊이 ~ 600 이상", "몇 자 ?", 188000, null, "=SUM(E9*F9)"], ["붙박이장", "슬라이딩", "내부 서랍 추가", "수량", 40000, null, "=SUM(E10*F10)"], ["붙박이장", "슬라이딩", "겉 서랍 추가", "수량", 50000, null, "=SUM(E11*F11)"], ["붙박이장", "스타일러장", "EA", "수량", 160000, null, "=SUM(E12*F12)"], ["신발장", "여닫이", "깊이 400 이하", "몇 자 ?", 130000, null, "=SUM(E13*F13)"], ["신발장", "중간 오픈 박스", "높이 450 이하", "수량", 130000, null, "=SUM(E14*F14)"], ["신발장", "중간 오픈 박스", "높이 450 이상 (벤치)", "수량", 180000, null, "=SUM(E15*F15)"], ["신발장", "단띄움 좌대", "SET", "수량", 30000, null, "=SUM(E16*F16)"], ["신발장", "벽걸이 시공", "SET", "수량", 30000, null, "=SUM(E17*F17)"], ["공통 (선택)", "손잡이", "심플바", "수량", 18000, null, "=SUM(E18*F18)"], ["공통 (선택)", "손잡이", "무소음 똑딱이", "수량", 7000, null, "=SUM(E19*F19)"], ["공통 (선택)", "손잡이", "빌스브로 150", "수량", 5000, null, "=SUM(E20*F20)"], ["공통 (선택)", "손잡이", "빗각바 손잡이", "수량", 10000, null, "=SUM(E21*F21)"], ["공통 (선택)", "측면 EP", "깊이 ~ 400 이하", "수량", 70000, null, "=SUM(E22*F22)"], ["공통 (선택)", "측면 EP", "깊이 401~700", "수량", 100000, null, "=SUM(E23*F23)"], ["공통 (선택)", "측면 EP", "깊이 701~850", "수량", 130000, null, "=SUM(E24*F24)"], ["공통 (선택)", "측면 EP", "깊이 851~1200", "수량", 160000, null, "=SUM(E25*F25)"], ["공통 (선택)", "거울 도어 변경", "롱 거울 도어 변경", "수량", 120000, null, "=SUM(E26*F26)"], ["공통 (선택)", "거울 도어 변경", "반 거울 도어 변경", "수량", 70000, null, "=SUM(E27*F27)"], ["총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "=SUM(G4:G27)"]]}, {"name": "화장대, 수납장", "rows": [["셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기"], [null, null, null, null, null, null, null], ["품 목", "종 류", "규 격", "길 이", "단 가", "입력란", "금 액"], ["화장대 ", "상부장", "높이 ~1300 이하", "몇 자 ?", 75000, null, "=SUM(E4*F4)"], ["화장대 ", "하부장 (좌식)", "깊이 ~600 이하", "몇 자 ?", 110000, 4.7, "=SUM(E5*F5)"], ["화장대 ", "하부장 (좌식)", "댐핑 볼레일 서랍", "수량", 20000, 4, "=SUM(E6*F6)"], ["화장대 ", "하부장 (입식)", "깊이 ~600 이하", "몇 자 ?", 80000, null, "=SUM(E7*F7)"], ["화장대 ", "하부장 (입식)", "언더 레일 서랍", "수량", 40000, null, "=SUM(E8*F8)"], ["화장대 ", "공통", "상판 (인조대리석)", "몇 미터 ?", 150000, null, "=SUM(E9*F9)"], ["화장대 ", "공통", "상부장 반거울 도어 ", "수량", 70000, null, "=SUM(E10*F10)"], ["수납장", "높이 ~ 500 이하", "도어형", "몇 자 ?", 55000, null, "=SUM(E11*F11)"], ["수납장", "높이 ~ 500 이하", "오픈형", "몇 자 ?", 35000, null, "=SUM(E12*F12)"], ["수납장", "높이 ~ 1200 이하", "도어형", "몇 자 ?", 80000, null, "=SUM(E13*F13)"], ["수납장", "높이 ~ 1200 이하", "오픈형", "몇 자 ?", 50000, 3, "=SUM(E14*F14)"], ["수납장", "높이 ~ 1200 이하", "오픈형 (마감재)", "몇 자 ?", 70000, null, "=SUM(E15*F15)"], ["수납장", "높이 ~ 2400 이하", "오픈형", "몇 자 ?", 85000, null, "=SUM(E16*F16)"], ["수납장", "높이 ~ 2400 이하", "도어형", "몇 자 ?", 140000, null, "=SUM(E17*F17)"], ["수납장", "높이 ~ 2400 이하", "오픈형 (마감재)", "몇 자 ?", 130000, null, "=SUM(E18*F18)"], ["수납장", "높이 ~ 2400 이상", "오픈형", "몇 자 ?", 100000, null, "=SUM(E19*F19)"], ["수납장", "높이 ~ 2400 이상", "도어형", "몇 자 ?", 170000, null, "=SUM(E20*F20)"], ["수납장", "마감재 오픈장", "높이 600 이하", "몇 자 ?", 150000, null, "=SUM(E21*F21)"], ["수납장", "마감재 오픈장", "높이 600-1200", "몇 자 ?", 250000, 1, "=SUM(E22*F22)"], ["수납장", "하부는 도어, 상부 오픈 마감재장", "하부는 도어, 상부 오픈 마감재장", "몇 자 ?", 150000, null, "=SUM(E23*F23)"], ["공통 (선택)", "손잡이", "심플바", "수량", 18000, null, "=SUM(E24*F24)"], ["공통 (선택)", "손잡이", "무소음 똑딱이", "수량", 7000, null, "=SUM(E25*F25)"], ["공통 (선택)", "손잡이", "빌스브로 150", "수량", 5000, null, "=SUM(E26*F26)"], ["공통 (선택)", "손잡이", "빗각바 손잡이", "수량", 10000, null, "=SUM(E27*F27)"], ["공통 (선택)", "측면 EP", "깊이 ~ 400 이하", "수량", 70000, null, "=SUM(E28*F28)"], ["공통 (선택)", "측면 EP", "깊이 401~700", "수량", 100000, 2, "=SUM(E29*F29)"], ["공통 (선택)", "측면 EP", "깊이 701~850", "수량", 130000, null, "=SUM(E30*F30)"], ["공통 (선택)", "측면 EP", "깊이 851~1200", "수량", 160000, null, "=SUM(E31*F31)"], ["공통 (선택)", "거울 도어 변경", "롱 거울 도어 변경", "수량", 120000, null, "=SUM(E32*F32)"], ["공통 (선택)", "거울 도어 변경", "반 거울 도어 변경", "수량", 70000, null, "=SUM(E33*F33)"], ["총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "=SUM(G4:G33)"], ["PB 18T = 20% UP", null, null, null, null, null, null]]}, {"name": "창고문, 도어및 마감재 교체", "rows": [["셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기"], [null, null, null, null, null, null, null], ["품 목", "종 류", "규 격", "길 이", "단 가", "입력란", "금 액"], ["창고문", "좌, 우측 프레임", "4자 이하", "수량", 350000, null, "=SUM(E4*F4)"], ["창고문", "좌, 우측 프레임", "4자 초과", "몇 자 ?", 88000, null, "=SUM(E5*F5)"], ["창고문", "좌, 우측 프레임", "가로 선반", "수량", 40000, null, "=SUM(E6*F6)"], ["창고문", "좌, 우측 프레임", "T 자 선반", "수량", 60000, null, "=SUM(E7*F7)"], ["창고문", "좌, 우측 프레임", "프레임 뒷면 마감", "수량", 40000, null, "=SUM(E8*F8)"], ["팬트리 틀", "도어", "롱 도어 ", "수량", 100000, null, "=SUM(E9*F9)"], ["팬트리 틀", "측면 EP", "깊이 ~ 400 이하", "수량", 70000, null, "=SUM(E10*F10)"], ["팬트리 틀", "측면 EP", "깊이 401~700", "수량", 100000, null, "=SUM(E11*F11)"], ["팬트리 틀", "측면 EP", "깊이 701~850", "수량", 130000, null, "=SUM(E12*F12)"], ["팬트리 틀", "측면 EP", "깊이 851~1200", "수량", 160000, null, "=SUM(E13*F13)"], ["팬트리 틀", "접이식 폴딩 추가 ", "도어 2장이 1조", "몇 조 ?", 250000, null, "=SUM(E14*F14)"], ["단순 교체\n(철거 별도)", "프레임, 걸레받이", "EA", "수량", 30000, null, "=SUM(E15*F15)"], ["단순 교체\n(철거 별도)", "도어", "~ 1200 이하", "수량", 50000, null, "=SUM(E16*F16)"], ["단순 교체\n(철거 별도)", "도어", "~ 1201 이상", "수량", 100000, null, "=SUM(E17*F17)"], ["단순 교체\n(철거 별도)", "도어", "서랍 도어", "수량", 30000, null, "=SUM(E18*F18)"], ["단순 교체\n(철거 별도)", "도어", "롱 거울 도어", "수량", 180000, null, "=SUM(E19*F19)"], ["단순 교체\n(철거 별도)", "도어", "반 거울 도어", "수량", 100000, null, "=SUM(E20*F20)"], ["단순 교체\n(철거 별도)", "문선", "ㄷ 자", "수량", 50000, null, "=SUM(E21*F21)"], ["공통 (선택)", "손잡이", "심플바", "수량", 18000, null, "=SUM(E22*F22)"], ["공통 (선택)", "손잡이", "무소음 똑딱이", "수량", 7000, null, "=SUM(E23*F23)"], ["공통 (선택)", "손잡이", "빌스브로 150", "수량", 5000, null, "=SUM(E24*F24)"], ["공통 (선택)", "손잡이", "빗각바 손잡이", "수량", 10000, null, "=SUM(E25*F25)"], [null, null, null, null, null, null, "=SUM(E26*F26)"], ["총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "=SUM(G4:G26)"]]}, {"name": "시스템 선반", "rows": [["셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기", "셀프 견적 내기"], [null, null, null, null, null, null, null], ["품 목", "종 류", "종 류", "길 이", "단 가", "입력란", "금 액"], ["시스템 헹거", "행거 길이 (코너 제외 없음)", "행거 길이 (코너 제외 없음)", "몇 자 ? ", 60000, null, "=SUM(E4*F4)"], ["시스템 헹거", "서랍 추가 (칸당)", "서랍 추가 (칸당)", "수량", 50000, null, "=SUM(E5*F5)"], ["시스템 헹거", "서랍 추가 (상단 유리 상판 디바이더)", "서랍 추가 (상단 유리 상판 디바이더)", "수량", 60000, null, "=SUM(E6*F6)"], ["시스템 헹거", "아일랜드 서랍장 (4단+유리상판 디바이더)", "아일랜드 서랍장 (4단+유리상판 디바이더)", "수량", 250000, null, "=SUM(E7*F7)"], ["시스템 헹거", "아일랜드 서랍장 (3단+유리상판 디바이더)", "아일랜드 서랍장 (3단+유리상판 디바이더)", "수량", 200000, null, "=SUM(E8*F8)"], ["시스템 헹거", "바지 걸이", "바지 걸이", "수량", 45000, null, "=SUM(E9*F9)"], ["시스템 헹거", "전신 거울 도어 (내부 선반 구성)", "전신 거울 도어 (내부 선반 구성)", "수량", 105000, null, "=SUM(E10*F10)"], [null, null, null, null, null, null, "=SUM(E11*F11)"], ["시스템 선반", "팬트리 선반 길이 (코너 제외 없음)", "팬트리 선반 길이 (코너 제외 없음)", "몇 자 ?", 65000, null, "=SUM(E12*F12)"], ["시스템 선반", "선반 추가 (세로 기둥 1줄에 선반 4개 기본)", "선반 추가 (세로 기둥 1줄에 선반 4개 기본)", "수량", 20000, null, "=SUM(E13*F13)"], [null, null, null, null, null, null, "=SUM(E14*F14)"], ["총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "총 금액 (VAT 별도)", "=SUM(G4:G14)"]]}]};
+var LS_KEY = "SELF_QUOTE_PICK_V60";
+
+function deepCopy(x){ return JSON.parse(JSON.stringify(x)); }
+function isEmpty(v){ return v===null || v===undefined || v==="" ; }
+function isFormula(v){ return typeof v==="string" && v.charAt(0)==="="; }
+function toNumber(v){
+  if (typeof v==="number") return v;
+  if (typeof v==="string") {
+    var t = v.replace(/,/g,"").trim();
+    var n = Number(t);
+    return isFinite(n) ? n : null;
+  }
+  return null;
+}
+function isEtcName(name){
+  if(!name) return false;
+  return String(name).trim().indexOf("기타")===0;
+}
+function isManualPick(sectionName, pick){
+  if (pick && pick.manual===true) return true;
+  if (isEtcName(sectionName)) return true;
+  if (pick && isEtcName(pick.name)) return true;
+  return false;
+}
+
+  // ============================================================
+// ✅ 연동(링크) 규칙 - "여기만 수정하면 됨"
+// ------------------------------------------------------------
+// 싱크대 세부(오른쪽)에서 특정 항목의 단가/금액을
+// 기준(옵션 먼저 선택)의 선택 결과(단가×수량)로부터 가져오는 규칙.
+//
+// ✅ 규칙 추가/변경 방법
+// 1) 아래 LINK_RULES에 한 줄 추가
+// 2) baseMid에 '기준(옵션 먼저 선택)'의 중분류명을 정확히 넣기
+//
+// 예)
+// { sectionName:"옵션 (하부장)", optName:"손잡이", baseMid:"손잡이" }
+// ============================================================
+var LINK_RULES = [
+  { sectionTag:"오른쪽", sectionName:"상부장",        optName:"주방 후드",       baseMid:"주방 후드" },
+  { sectionTag:"오른쪽", sectionName:"옵션 (하부장)", optName:"개수대 볼 종류",  baseMid:"백조 볼" },
+  { sectionTag:"오른쪽", sectionName:"옵션 (하부장)", optName:"입수전",         baseMid:"입수전" },
+  { sectionTag:"오른쪽", sectionName:"옵션 (하부장)", optName:"손잡이",         baseMid:"손잡이" }
+];
+
+function findLinkRule(section, pick){
+  if(!section || !pick) return null;
+  for(var i=0;i<LINK_RULES.length;i++){
+    var r = LINK_RULES[i];
+    if(section.tag===r.sectionTag && section.name===r.sectionName && pick.name===r.optName) return r;
+  }
+  return null;
+}
+
+function isLinkedItem(section, pick){
+  return !!findLinkRule(section, pick);
+}
+
+function getLinkedBasePick(section, pick){
+  var rule = findLinkRule(section, pick);
+  if(!rule) return null;
+  if(!(state.saved && state.saved["싱크대"])) return null;
+  return state.saved["싱크대"][rule.baseMid] || null;
+}
+
+function getLinkedAmount(section, pick){
+
+    // ✅ 연동 항목 금액 = (기준 금액 = 기존 단가×기존 수량) × (현재 입력 수량)
+    var base = getLinkedBasePick(section, pick);
+    var baseUnit = base ? Number(base.unit||0) : 0;
+    var baseQty  = base ? Number(base.qty ||0) : 0;
+    var baseTotal = baseUnit * baseQty;
+
+    var qty = Number(pick.qty||0);
+    return baseTotal * qty;
+  }
+  function hasLinkedDetailForBase(baseMidName){
+    // ✅ 특정 '기존' 중분류가 현재 싱크대 세부에서 연동 선택되어 있으면 true
+    //    지금은 baseMidName === '주방 후드'만 사용
+    if(baseMidName !== "주방 후드") return false;
+    // 오른쪽(싱크대 세부) 상부장에 '주방 후드' 선택이 있는지 확인
+    var sec = {tag:"오른쪽", name:"상부장"};
+    var p = getPick(sec.name);
+    return (p && p.name==="주방 후드");
+  }
+
+
+
+function fmtWon(n){
+  if (n===null || n===undefined) return "0";
+  return Math.round(n).toLocaleString("ko-KR");
+}
+
+
+
+  // ===========================
+  // ✅ 합계 계산 제외 규칙
+  // - "기준(옵션 먼저 선택)" 섹션은 "연동 기준금액"을 만들기 위한 선택값일 뿐
+  // - 따라서 상단의 '시트 합계/전체 합계'에는 포함하지 않는다.
+  // ===========================
+  function isBaseSectionName(sectionName){
+    if(!sectionName) return false;
+    // 화면 라벨이 약간 바뀌어도 안전하게 잡기 위해 '기준' + '옵션' 키워드로 판별
+    var s = String(sectionName);
+    return (s.indexOf("기준") >= 0 && s.indexOf("옵션") >= 0);
+  }
+
+
+  // ===========================
+  // ✅ 싱크대 세부 '대리석' 연동 규칙
+  // - 기준 단가/금액의 출처: '기준(옵션 먼저 선택)'의 '대리석 상판' 선택 단가(unit)
+  // - 싱크대 세부에서:
+  //    · 대리석 (~700폭)     : 단가 = 기준 unit, 수량은 사용자 입력
+  //    · 대리석 (700~900폭)  : 단가 = (기준 금액 × 1.5), 수량은 사용자 입력
+  // ===========================
+  function getBaseUnitForMarble(){
+    // 기준(옵션 먼저 선택) > 대리석 상판의 '단가(unit)'
+    var basePick = (state.saved && state.saved["싱크대"]) ? state.saved["싱크대"]["대리석 상판"] : null;
+    return basePick ? Number(basePick.unit || 0) : 0;
+  }
+  function getBaseAmountForMarble(){
+    // ✅ (주방후드 방식) 기준(옵션 먼저 선택)에서 계산된 '금액' = unit × qty
+    // 싱크대 세부의 대리석(~700폭) 단가로 이 값을 사용한다.
+    var basePick = (state.saved && state.saved["싱크대"]) ? state.saved["싱크대"]["대리석 상판"] : null;
+    var u = basePick ? Number(basePick.unit || 0) : 0;
+    var q = basePick ? Number(basePick.qty  || 0) : 0;
+    return u * q;
+  }
+  function isQtyLockedItem(section, pick){
+    return (section && section.tag==="오른쪽" && section.name==="대리석" && pick && pick.name==="대리석 (700~900폭)");
+  }
+// ---- formula eval (SUM(range) + SUM(expr) + refs + arithmetic) ----
+function nameToCol(name){
+  var n=0;
+  for(var i=0;i<name.length;i++) n = n*26 + (name.charCodeAt(i)-64);
+  return n-1;
+}
+function addrToRC(addr){
+  var m=/^([A-Z]+)(\d+)$/.exec(addr);
+  if(!m) return null;
+  return {r:parseInt(m[2],10)-1, c:nameToCol(m[1])};
+}
+  // ===========================
+  // ✅ 기준(옵션 먼저 선택) -> 싱크대 세부 연동 공통
+  //  - baseMidName(예: '백조 볼','입수전','손잡이','주방 후드','대리석 상판')
+  //  - 반환: 기준 금액(단가×수량). 없으면 0
+  // ===========================
+  function getBaseTotal(baseMidName){
+    var basePick = (state.saved && state.saved["싱크대"]) ? state.saved["싱크대"][baseMidName] : null;
+    var u = basePick ? Number(basePick.unit || 0) : 0;
+    var q = basePick ? Number(basePick.qty  || 0) : 0;
+    return u * q;
+  }
+
+  // ✅ 싱크대 세부(오른쪽) checkbox 항목의 기본 단가(=금액 표시용) 계산
+  // - 반환: { unit:number, manual:boolean }
+  function calcRightItem(section, optName, optUnit, optManual){
+    // 1) 대리석 연동
+    if(section && section.tag==="오른쪽" && section.name==="대리석"){
+      var baseAmount = getBaseAmountForMarble(); // 기준 금액
+      if(optName==="대리석 (~700폭)") return { unit: baseAmount, manual:false };
+      if(optName==="대리석 (700~900폭)") return { unit: Math.round(baseAmount*1.5), manual:false };
+    }
+
+    // 2) 상부장 > 주방 후드(기존 주방후드 금액 연동)
+    if(section && section.tag==="오른쪽" && section.name==="상부장" && optName==="주방 후드"){
+      return { unit: getBaseTotal("주방 후드"), manual:false };
+    }
+
+    // 3) 옵션(하부장) 연동: 개수대 볼 종류/입수전/손잡이
+    if(section && section.tag==="오른쪽" && section.name.indexOf("옵션")===0){
+      if(optName==="개수대 볼 종류") return { unit: getBaseTotal("백조 볼"), manual:false };
+      if(optName==="입수전") return { unit: getBaseTotal("입수전"), manual:false };
+      if(optName==="손잡이") return { unit: getBaseTotal("손잡이"), manual:false };
+    }
+
+    // 4) 기본: 엑셀 단가(=optUnit) 사용, 기타/수동이면 unit=0
+    return { unit: optManual ? 0 : Number(optUnit||0), manual: !!optManual };
+  }
+
+function getCellValue(sheet, r, c, memo){
+  var key = r+":"+c;
+  if (memo[key]!==undefined) return memo[key];
+  var v = (sheet.rows[r]||[])[c];
+  var out = null;
+  if (isFormula(v)) out = evalFormula(sheet, v, memo, r, c);
+  else out = toNumber(v);
+  memo[key] = out;
+  return out;
+}
+function sumRange(sheet, a1, a2, memo){
+  var p1=addrToRC(a1), p2=addrToRC(a2);
+  if(!p1 || !p2) return 0;
+  var r1=Math.min(p1.r,p2.r), r2=Math.max(p1.r,p2.r);
+  var c1=Math.min(p1.c,p2.c), c2=Math.max(p1.c,p2.c);
+  var s=0;
+  for(var r=r1;r<=r2;r++) for(var c=c1;c<=c2;c++){
+    var n = getCellValue(sheet,r,c,memo);
+    if (typeof n==="number" && isFinite(n)) s += n;
+  }
+  return s;
+}
+function evalFormula(sheet, formula, memo, selfR, selfC){
+  var expr = formula.substring(1).trim().toUpperCase();
+
+  expr = expr.replace(/SUM\(([^)]+)\)/g, function(_, inside){
+    var t = inside.trim();
+    var m = /^\s*([A-Z]+\d+)\s*:\s*([A-Z]+\d+)\s*$/.exec(t);
+    if(m) return String(sumRange(sheet, m[1], m[2], memo));
+    return "(" + t + ")";
+  });
+
+  expr = expr.replace(/\b([A-Z]+\d+)\b/g, function(m){
+    var rc = addrToRC(m);
+    if(!rc) return "0";
+    if (rc.r===selfR && rc.c===selfC) return "0";
+    var n = getCellValue(sheet, rc.r, rc.c, memo);
+    return (typeof n==="number" && isFinite(n)) ? String(n) : "0";
+  });
+
+  if(!/^[0-9+\-*/().\s]+$/.test(expr)) return null;
+  try {
+    var val = Function("return ("+expr+");")();
+    return (typeof val==="number" && isFinite(val)) ? val : null;
+  } catch(e) { return null; }
+}
+
+// ---- parsing ----
+function parseSectionsDefault(sheet){
+  var rows = sheet.rows;
+  var sections = [];
+  for(var i=0;i<rows.length;i++){
+    var b = (rows[i]||[])[1];
+    var c = (rows[i]||[])[2];
+    var btxt = isEmpty(b) ? "" : String(b).trim();
+    var ctxt = isEmpty(c) ? "" : String(c).trim();
+    if (btxt && ctxt.indexOf("단가")>=0) sections.push({ name: btxt, startRow: i+1, endRow: rows.length, tag:"기존" });
+  }
+  for(var k=0;k<sections.length;k++){
+    if (k < sections.length-1) sections[k].endRow = sections[k+1].startRow - 2;
+  }
+  for(var s=0;s<sections.length;s++){
+    var sec = sections[s], opts=[];
+    for(var r=sec.startRow; r<=sec.endRow; r++){
+      var name = (rows[r]||[])[1];
+      if(isEmpty(name)) continue;
+      name=String(name).trim(); if(!name) continue;
+
+      // ✅ [요청 반영] 기존(옵션 먼저 선택) '손잡이' 중분류의 '총 금액*' 행은 계산용 요약이므로 제외
+      if (sec.name === "손잡이" && name.indexOf("총 금액") === 0) continue;
+
+      var v2=(rows[r]||[])[2], v7=(rows[r]||[])[7];
+      var price = toNumber(v2);
+      if(price===null) price = toNumber(v7);
+      if(price===null && isFormula(v2)){ var memo={}; price = getCellValue(sheet, r, 2, memo); }
+      if(price===null && isFormula(v7)){ var memo2={}; price = getCellValue(sheet, r, 7, memo2); }
+      if(price===null) price=0;
+
+      opts.push({ name:name, unit: price, manual:isEtcName(name), baseQty:null });
+    }
+    sec.options=opts;
+  }
+  return sections.filter(function(x){ return x.options && x.options.length>0; });
+}
+
+function parseSectionsSinkRight(sheet){
+  var rows = sheet.rows;
+  var sectionsMap = {};
+  var order = [];
+  var current = null;
+
+  for(var r=3; r<rows.length; r++){
+    var e = (rows[r]||[])[4];
+    if(!isEmpty(e)) current = String(e).trim().replace(/\n/g," ").replace(/\s+/g," ");
+    if(isEmpty(current)) continue;
+
+    if(!sectionsMap[current]){
+      sectionsMap[current] = { name: current, options: [], tag:"오른쪽" };
+      order.push(current);
+    }
+
+    var f = (rows[r]||[])[5];
+    var g = (rows[r]||[])[6];
+    var h = (rows[r]||[])[7];
+    var iCol = (rows[r]||[])[8];
+
+    var ftxt = isEmpty(f) ? "" : String(f).trim();
+    var gtxt = isEmpty(g) ? "" : String(g).trim();
+
+    // ✅ G열이 '옵션 선택 ...' 메모인 경우: 소분류명에는 붙이지 않는다(대리석 행들이 여기 해당)
+    var gIsOptionNote = (gtxt && gtxt.indexOf("옵션 선택") === 0);
+
+    // ✅ G열이 "단가 직접 입력"인 경우: 소분류명에는 붙이지 않는다(표에는 "기타"만 보이게)
+    //    - 실제 단가는 오른쪽 패널에서 사용자가 입력한다.
+    var gIsManualHint = (gtxt === "단가 직접 입력");
+
+    // ✅ 소분류명은 기본적으로 F열(필수). G열은 옵션메모가 아니고, 수동입력 힌트도 아닐 때만 붙임
+    var combined = ftxt;
+    if (!gIsOptionNote && !gIsManualHint && gtxt) combined = (ftxt + " " + gtxt).trim().replace(/\s+/g," ");
+    combined = (combined || "").trim();
+
+    if(!combined) continue;
+
+    // ✅ 헤더 행(소분류명이 '옵션 선택'인 경우)만 제외
+    if (combined === "옵션 선택") continue;
+
+    var price = toNumber(h);
+    if(price===null && isFormula(h)){ var memo3={}; price = getCellValue(sheet, r, 7, memo3); }
+    if(price===null){
+      // ✅ 수동입력(예: '기타' + '단가 직접 입력') 행은 H열 단가가 비어도 옵션으로 노출해야 한다.
+      //    단가는 오른쪽 패널에서 사용자가 직접 입력한다.
+      if(gIsManualHint || isEtcName(combined)) price = 0;
+      else continue;
+    }
+
+    var baseQty = toNumber(iCol);
+    var manual = isEtcName(combined);
+
+    sectionsMap[current].options.push({
+      name: combined,
+      unit: manual ? 0 : price,
+      manual: manual,
+      baseQty: (typeof baseQty==="number" && isFinite(baseQty)) ? baseQty : null
+    });
+  }
+
+  var sections=[];
+  for(var i=0;i<order.length;i++) sections.push(sectionsMap[order[i]]);
+  sections = sections.filter(function(s){ return s.options && s.options.length>0; });
+
+  var prefer = ["상부장","하부장","대리석","옵션"];
+  sections.sort(function(a,b){
+    var ia=-1, ib=-1;
+    for(var i=0;i<prefer.length;i++){
+      if(a.name.indexOf(prefer[i])===0) ia=i;
+      if(b.name.indexOf(prefer[i])===0) ib=i;
+    }
+    if(ia===-1 && ib===-1) return a.name.localeCompare(b.name,"ko");
+    if(ia===-1) return 1;
+    if(ib===-1) return -1;
+    return ia-ib;
+  });
+  return sections;
+}
+
+
+function parseSectionsFridgeAppliance(sheet){
+  // 냉장고, 가전 키큰장 시트 파서
+  // - 중분류(좌측 버튼)  : 품 목(냉장고장/가전 수납장/주방 수납장/홈바장/냉장고 홈바장/손잡이 등)
+  // - 소분류(옵션 리스트): (종 류 + 규 격) 조합
+  // - 단가: E열(인덱스 4)
+  // - 수량 기본값: 입력란(F열, 인덱스 5) 숫자면 그 값, 아니면 null
+  // - 이 시트는 여러 라인을 더하는 구조이므로 기본적으로 checkbox 멀티로 동작(section.multi=true)
+  var rows = sheet.rows || [];
+  var sectionsMap = {};
+  var order = [];
+  var currentItem = null;
+
+  // 헤더(품 목/종 류...) 다음부터 탐색
+  var start = 0;
+  for(var i=0;i<rows.length;i++){
+    var a = (rows[i]||[])[0];
+    if(String(a||"").trim()==="품 목"){ start = i+1; break; }
+  }
+
+  for(var r=start; r<rows.length; r++){
+    var row = rows[r] || [];
+    var item = row[0];
+    var type = row[1];
+    var spec = row[2];
+    var qtyLabel = row[3];
+    var unit = row[4];
+    var baseQty = row[5];
+
+    // 빈 줄/구분선
+    if(isEmpty(item) && isEmpty(type) && isEmpty(spec) && isEmpty(unit)) continue;
+
+    // 총계/문구 행 제외
+    var itemTxt = isEmpty(item) ? "" : String(item).trim();
+    if(itemTxt && itemTxt.indexOf("총 금액")===0) break;
+
+    if(!isEmpty(itemTxt)) currentItem = itemTxt;
+    if(isEmpty(currentItem)) continue;
+
+    if(!sectionsMap[currentItem]){
+      sectionsMap[currentItem] = { name: currentItem, options: [], tag:"", multi:true };
+      order.push(currentItem);
+    }
+
+    // 옵션명 구성: "종류 / 규격" (한쪽이 비면 있는 것만)
+    var t = isEmpty(type) ? "" : String(type).trim().replace(/\s+/g," ");
+    var s = isEmpty(spec) ? "" : String(spec).trim().replace(/\s+/g," ");
+    var optName = (t && s) ? (t + " / " + s) : (t || s);
+
+    // 일부 행은 item만 있고 type/spec이 비는 케이스가 있어 안전 처리
+    if(!optName) continue;
+
+    var price = toNumber(unit);
+    var manual = false;
+
+    // 단가가 비어있으면 수동 입력(혹시라도 생길 미래 케이스 대비)
+    if(price===null){
+      price = 0;
+      manual = true;
+    }
+
+    var bq = toNumber(baseQty);
+    if(!(typeof bq==="number" && isFinite(bq))) bq = null;
+
+    sectionsMap[currentItem].options.push({
+      name: optName,
+      unit: manual ? 0 : price,
+      manual: manual,
+      baseQty: bq,
+      qtyLabel: isEmpty(qtyLabel) ? "" : String(qtyLabel).trim()
+    });
+  }
+
+  var sections=[];
+  for(var k=0;k<order.length;k++) sections.push(sectionsMap[order[k]]);
+  return sections.filter(function(s){ return s.options && s.options.length>0; });
+}
+
+
+
+function parseSectionsStandardByItem(sheet){
+  // ✅ 일반 7열 시트(품목/종류/규격/길이/단가/입력란/금액) 파서
+  // - 중분류: 품목(A열, col0) 기준으로 그룹
+  // - 소분류: 종류(B열) + 규격(C열) 조합
+  // - 단가: 단가(E열, col4)
+  // - 기본 수량: 입력란(F열, col5) 숫자면 baseQty로 사용
+  var rows = sheet.rows || [];
+  var sectionsMap = {};
+  var order = [];
+  var currentItem = null;
+
+  // 헤더 탐색: '품 목'이 있는 행 다음부터 데이터로 간주
+  var startRow = 0;
+  for(var i=0;i<rows.length;i++){
+    var a = (rows[i]||[])[0];
+    if(!isEmpty(a) && String(a).replace(/\s+/g,"") === "품목"){
+      startRow = i+1;
+      break;
+    }
+  }
+  // 일부 시트는 0~2행이 타이틀/공백이라, 안전하게 3행부터 시도
+  if(startRow < 3) startRow = 3;
+
+  for(var r=startRow; r<rows.length; r++){
+    var row = rows[r] || [];
+    var item = row[0];
+    if(!isEmpty(item)) currentItem = String(item).trim().replace(/\n/g," ").replace(/\s+/g," ");
+    if(isEmpty(currentItem)) continue;
+
+    if(!sectionsMap[currentItem]){
+      sectionsMap[currentItem] = { name: currentItem, options: [], tag:"", multi:true };
+      order.push(currentItem);
+    }
+
+    var kind = isEmpty(row[1]) ? "" : String(row[1]).trim().replace(/\s+/g," ");
+    var spec = isEmpty(row[2]) ? "" : String(row[2]).trim().replace(/\s+/g," ");
+    var len  = isEmpty(row[3]) ? "" : String(row[3]).trim().replace(/\s+/g," ");
+    var unit = toNumber(row[4]);
+
+    // 합계/메모 행 스킵
+    if(kind && kind.indexOf("총 금액")===0) continue;
+    if(!kind && !spec && !len && (unit===null || unit===0)) continue;
+
+    // 옵션명 구성: 종류 / 규격 (길이는 설명이라 붙여도 되고, 옵션명엔 과하면 빼도 됨)
+    var optName = (kind + (spec?(" / "+spec):"")).trim();
+    if(!optName) continue;
+
+    // 단가 없고 수식이면 평가
+    if(unit===null){
+      var v = row[4];
+      if(isFormula(v)){ var memo={}; unit = getCellValue(sheet, r, 4, memo); }
+    }
+    if(unit===null) continue;
+
+    var baseQty = toNumber(row[5]);
+    sectionsMap[currentItem].options.push({
+      name: optName,
+      unit: Number(unit||0),
+      manual: false,
+      baseQty: (typeof baseQty==="number" && isFinite(baseQty)) ? baseQty : null
+    });
+  }
+
+  var out=[];
+  for(var j=0;j<order.length;j++) out.push(sectionsMap[order[j]]);
+  // 빈 섹션 제거
+  out = out.filter(function(s){ return s.options && s.options.length>0; });
+  return out;
+}
+
+function parseSheetToSections(sheet){
+  if(sheet.name==="싱크대"){
+    var left=parseSectionsDefault(sheet);
+    var right=parseSectionsSinkRight(sheet);
+    return left.concat(right);
+  }
+  // ✅ 나머지 시트는 '품목' 기준(멀티) 파서를 사용
+  return parseSectionsStandardByItem(sheet);
+}
+
+// ---- storage ----
+function loadSaved(){
+  try { var raw = localStorage.getItem(LS_KEY); return raw ? JSON.parse(raw) : null; }
+  catch(e) { return null; }
+}
+function saveAll(data){ localStorage.setItem(LS_KEY, JSON.stringify(data)); }
+
+var state = { sheetIndex:0, sectionIndex:0, book:null, sectionsCache:null, saved:null, rightActive:null };
+function getSheetKey(){ return state.book.sheets[state.sheetIndex].name; }
+function ensureSaved(){
+  if(!state.saved) state.saved = {};
+  var sk = getSheetKey();
+  if(!state.saved[sk]) state.saved[sk] = {};
+}
+/* setPick(sectionName, pick)
+   - sectionName(중분류)에 대한 선택값을 state.saved[대분류][sectionName]에 저장한다.
+   - pick.unit: 단가(원)
+   - pick.qty : 수량(숫자)
+   - pick.qtyRaw: 사용자가 입력한 원문(소수점/임시 입력용) */
+
+function setPick(sectionName, pick){
+  ensureSaved();
+  var sk = getSheetKey();
+  state.saved[sk][sectionName] = pick;
+  saveAll(state.saved);
+}
+/* getPick(sectionName)
+   - 현재 화면(중분류)별로 사용자가 선택한 값(state.saved)을 조회한다.
+   - 반환값: { name, unit, qty, qtyRaw, manual } 또는 null */
+
+function getPick(sectionName){
+  ensureSaved();
+  var sk = getSheetKey();
+  return state.saved[sk][sectionName] || null;
+}
+function clearPick(sectionName){
+  ensureSaved();
+  var sk = getSheetKey();
+  delete state.saved[sk][sectionName];
+  saveAll(state.saved);
+}
+function isDonePick(p){
+  if(!p) return false;
+  // ✅ 싱크대 세부(checkbox 멀티) 지원
+  if(p.multi && p.items){
+    for(var k in p.items){
+      if(!p.items.hasOwnProperty(k)) continue;
+      var it = p.items[k];
+      if(Number(it.unit||0)>0 && Number(it.qty||0)>0) return true;
+    }
+    return false;
+  }
+  return (Number(p.unit||0)>0 && Number(p.qty||0)>0);
+}
+
+// ---- UI ----
+function buildSheetTabs(){
+  var tabs = document.getElementById("tabs");
+  tabs.innerHTML = "";
+
+  function calcSheetTotalByName(sheetName){
+    ensureSaved();
+    var mm = state.saved[sheetName] || {};
+    // 합계 제외 목록(싱크대의 기존/기준 섹션 제외)
+    var ex = {};
+    for(var i=0;i<state.book.sheets.length;i++){
+      if(state.book.sheets[i].name!==sheetName) continue;
+      var secs = parseSheetToSections(state.book.sheets[i]);
+      for(var j=0;j<secs.length;j++){
+        var sec = secs[j];
+        if(sheetName==="싱크대" && sec.tag==="기존") ex[sec.name]=true;
+        if(isBaseSectionName && isBaseSectionName(sec.name)) ex[sec.name]=true;
+      }
+    }
+    var sum=0;
+    for(var k in mm){
+      if(!mm.hasOwnProperty(k)) continue;
+      if(ex[k]) continue;
+      var p = mm[k];
+      if(p && p.multi && p.items){
+        for(var kk in p.items){
+          if(!p.items.hasOwnProperty(kk)) continue;
+          var it=p.items[kk];
+          sum += (Number(it.unit||0) * Number(it.qty||0));
+        }
+      } else {
+        sum += (Number(p.unit||0) * Number(p.qty||0));
+      }
+    }
+    return sum;
+  }
+
+  for(var i=0;i<state.book.sheets.length;i++){
+    (function(idx){
+      var name = state.book.sheets[idx].name;
+      var total = calcSheetTotalByName(name);
+      var btn = document.createElement("button");
+      btn.className = "tabbtn" + (idx===state.sheetIndex ? " active":"");
+      btn.textContent = total>0 ? (name + " (" + fmtWon(total) + "원)") : name;
+      btn.onclick = function(){ loadSheet(idx); };
+      tabs.appendChild(btn);
+    })(i);
+  }
+}
+
+function sectionMatchesQuery(s, q){
+  if(!q) return true;
+  if(s.name.toLowerCase().indexOf(q)>=0) return true;
+  for(var j=0;j<s.options.length;j++){
+    if(s.options[j].name.toLowerCase().indexOf(q)>=0) return true;
+  }
+  return false;
+}
+
+function getFirstVisibleSectionIndex(){
+  var q = document.getElementById("q").value.trim().toLowerCase();
+  for(var i=0;i<state.sectionsCache.length;i++){
+    if(sectionMatchesQuery(state.sectionsCache[i], q)) return i;
+  }
+  return 0;
+}
+
+function buildSectionList(){
+  var host = document.getElementById("sections");
+  host.innerHTML = "";
+
+  var sections = state.sectionsCache || [];
+  var q = document.getElementById("q").value.trim().toLowerCase();
+  var isSink = (state.book.sheets[state.sheetIndex].name === "싱크대");
+
+  function addBtn(idx, sec){
+    var pick=getPick(sec.name);
+    var done=isDonePick(pick);
+    var btn=document.createElement("button");
+    btn.className="listbtn" + (idx===state.sectionIndex ? " active":"") + (done ? " done":"");
+    btn.textContent=sec.name;
+    btn.onclick=function(){ loadSection(idx); };
+    host.appendChild(btn);
+  }
+
+  var any=0;
+  if(!isSink){
+    for(var i=0;i<sections.length;i++){
+      if(!sectionMatchesQuery(sections[i], q)) continue;
+      any++; addBtn(i, sections[i]);
+    }
+  } else {
+    var g1=document.createElement("div"); g1.className="groupTitle"; g1.textContent="기존 (옵션 먼저 선택)";
+    var g2=document.createElement("div"); g2.className="groupTitle"; g2.textContent="싱크대 세부 (상부장/하부장/대리석/옵션)";
+
+    var has1=false, has2=false;
+
+    for(var i=0;i<sections.length;i++){
+      var s=sections[i];
+      if(!sectionMatchesQuery(s, q)) continue;
+
+      if(s.tag==="기존"){
+        if(!has1){ host.appendChild(g1); has1=true; }
+        any++; addBtn(i,s);
+      } else if(s.tag==="오른쪽"){
+        if(!has2){ host.appendChild(g2); has2=true; }
+        any++; addBtn(i,s);
+      }
+    }
+  }
+
+  if(any===0){
+    var empty=document.createElement("div");
+    empty.className="muted";
+    empty.textContent="검색 결과가 없습니다.";
+    host.appendChild(empty);
+  }
+}
+
+function setUnitMode(manual){
+  var fixed=document.getElementById("unitModeFixed");
+  var input=document.getElementById("unitInput");
+  if(manual){ fixed.classList.add("hidden"); input.classList.remove("hidden"); }
+  else { fixed.classList.remove("hidden"); input.classList.add("hidden"); }
+}
+function renderManualHint(show){
+  var el=document.getElementById("manualHint");
+  if(show) el.classList.remove("hidden");
+  else el.classList.add("hidden");
+}
+
+function setPriceHeader(section){
+  var h = document.getElementById("priceHeader");
+  if(section && section.tag==="오른쪽") h.textContent = "금액";
+  else h.textContent = "단가";
+}
+
+/* updateRightPanel()
+   - 오른쪽 '선택 결과' 패널을 업데이트한다.
+   - 핵심 규칙:
+     1) 일반 항목: 단가=pick.unit, 금액=단가×수량
+     2) 기타/수동(manual): 사용자가 단가 입력
+     3) 연동 항목(예: 상부장>주방 후드):
+        - 단가 = (기존 화면의 단가×기존 수량) = baseTotal
+        - 금액 = baseTotal × (이 화면에서 입력한 수량) */
+
+function updateRightPanel(){
+  var section=state.sectionsCache[state.sectionIndex];
+  var pick=getPick(section.name);
+
+  var pickedEl=document.getElementById("picked");
+  var unitEl=document.getElementById("unitPrice");
+  var unitInput=document.getElementById("unitInput");
+  var qtyEl=document.getElementById("qty");
+  var amtEl=document.getElementById("amount");
+
+  // ✅ 중분류 타입에 따라 수량 입력 가이드/키패드 힌트 변경
+  var allowDecimal = (section && section.tag === "오른쪽");
+  qtyEl.setAttribute("inputmode", allowDecimal ? "decimal" : "numeric");
+  qtyEl.setAttribute("placeholder", allowDecimal ? "예: 2.345" : "예: 3");
+
+  var qtyFocused = (document.activeElement === qtyEl);
+
+  // 초기화
+  function clearPanel(){
+    pickedEl.textContent="-";
+    var editWrap = document.getElementById("editPickWrap");
+    if(editWrap) editWrap.classList.add("hidden");
+
+    unitEl.textContent = fmtWon(0);
+    if(!qtyFocused) qtyEl.value="";
+    amtEl.textContent = fmtWon(0);
+    renderManualHint(false);
+  }
+
+  if(!pick){
+    clearPanel();
+    return;
+  }
+
+  // ✅ 싱크대 세부(오른쪽) checkbox 멀티: '활성 항목' 기준으로 우측 패널 표시
+  if(section && ((section.tag==="오른쪽") || section.multi===true) && pick.multi && pick.items){
+    var keys=[];
+    for(var k in pick.items){ if(pick.items.hasOwnProperty(k)) keys.push(k); }
+    if(keys.length===0){
+      clearPanel();
+      return;
+    }
+
+    var act = (state.rightActive && state.rightActive.section===section.name) ? state.rightActive.opt : null;
+    if(!act || !pick.items[act]) act = keys[0];
+
+    
+    // ✅ UI 개선(v70): 멀티 선택 시 "편집 대상"을 명확히 선택할 수 있도록 드롭다운 제공
+    var editWrap = document.getElementById("editPickWrap");
+    var editSel = document.getElementById("editPickSelect");
+    if(editWrap && editSel){
+      editWrap.classList.remove("hidden");
+      // 옵션 목록 구성(중복 재구성 방지 없이 항상 state 기준으로 재빌드)
+      editSel.innerHTML = "";
+      for(var si=0; si<keys.length; si++){
+        var opt = document.createElement("option");
+        opt.value = keys[si];
+        opt.textContent = keys[si];
+        editSel.appendChild(opt);
+      }
+      editSel.value = act;
+      if(!editSel._bound){
+        editSel.addEventListener("change", function(){
+          var sec = state.sectionsCache[state.sectionIndex];
+          state.rightActive = { section: sec.name, opt: this.value };
+          updateRightPanel();
+          renderPickedList(); // ✅ 리스트에서 강조 표시
+        });
+        editSel._bound = true;
+      }
+    }
+var it = pick.items[act];
+    var unit = Number(it.unit||0);
+    var manual = !!it.manual;
+
+    pickedEl.textContent = "선택됨: " + section.name + " (총 " + keys.length + "개) · 편집: " + act;
+qtyEl.readOnly = false;
+    qtyEl.classList.remove("readonly");
+    unitEl.textContent = fmtWon(unit);
+
+    if(!qtyFocused){
+      if(it.qtyRaw != null && it.qtyRaw !== "") qtyEl.value = String(it.qtyRaw);
+      else qtyEl.value = (it.qty!=null && Number(it.qty)!==0 ? String(it.qty) : "");
+    }
+
+    var qtyVal = qtyEl.value;
+    var qtyNum = parseFloat(qtyVal);
+    if(!isFinite(qtyNum)) qtyNum = (it.qty!=null ? Number(it.qty) : 0);
+
+    amtEl.textContent = fmtWon(unit * qtyNum);
+    renderManualHint(manual);
+    return;
+  }
+
+  // ---- 기존(단일 선택) 로직 ----
+  var manual = !!pick.manual;
+  var editWrap = document.getElementById("editPickWrap");
+  if(editWrap) editWrap.classList.add("hidden");
+
+  pickedEl.textContent = pick.name || "-";
+
+  // ✅ 연동 항목(주방후드/대리석/백조볼/입수전/손잡이 등)은 calcRightItem에서 unit에 반영되어 저장됨
+  qtyEl.readOnly = false;
+  qtyEl.classList.remove("readonly");
+  unitEl.textContent = fmtWon(pick.unit||0);
+
+  if(!qtyFocused){
+    if(pick.qtyRaw != null && pick.qtyRaw !== "") qtyEl.value = pick.qtyRaw;
+    else qtyEl.value = (pick.qty!=null && Number(pick.qty)!==0 ? String(pick.qty) : "");
+  }
+
+  var qtyVal = qtyEl.value;
+  var qtyNum = parseFloat(qtyVal);
+  if(!isFinite(qtyNum)) qtyNum = (pick.qty!=null ? Number(pick.qty) : 0);
+
+  amtEl.textContent = fmtWon((Number(pick.unit)||0) * qtyNum);
+  renderManualHint(manual);
+}
+
+
+/* renderOptions()
+   - 현재 선택된 중분류(section)의 소분류(옵션) 목록을 테이블로 렌더링한다.
+   - radio 클릭 시 setPick()으로 저장하고, updateRightPanel()/computeTotals()를 호출한다. */
+
+function renderOptions(){
+  var sheet=state.book.sheets[state.sheetIndex];
+  var section=state.sectionsCache[state.sectionIndex];
+
+  document.getElementById("curSheet").textContent=sheet.name;
+  document.getElementById("curSection").textContent=section.name;
+
+  setPriceHeader(section);
+
+  var tbody=document.getElementById("optionsBody");
+  tbody.innerHTML="";
+
+  var pick=getPick(section.name);
+  var pickedName=pick ? pick.name : null;
+
+  for(var i=0;i<section.options.length;i++){
+    (function(opt){
+      var tr=document.createElement("tr");
+
+      var tdSel=document.createElement("td");
+      
+      var isSinkRight = (section && section.tag==="오른쪽");
+      var isMulti = !!(section && section.multi) || isSinkRight;
+      var sel=document.createElement("input");
+      sel.type = isMulti ? "checkbox" : "radio";
+
+      // ✅ (UX) 라디오도 "행 클릭"으로 선택되게 처리
+      // - 체크박스는 기본적으로 input 클릭으로 토글되지만,
+      //   라디오는 사용자가 행을 눌렀을 때도 선택되도록 통일한다.
+      if(!isMulti){
+        tr.style.cursor = "pointer";
+        tr.addEventListener("click", function(e){
+          // input(라디오/체크박스)을 직접 누른 경우는 브라우저 기본 동작에 맡김
+          if(e && e.target === sel) return;
+          // 이미 선택된 라디오를 다시 눌러도 "해제"는 하지 않는다(라디오 특성 유지)
+          sel.checked = true;
+          if(typeof sel.onclick === "function") sel.onclick();
+        });
+      }
+
+      sel.name = isMulti ? ("optPick_"+section.name) : "optPick";
+
+      // ✅ 체크 상태
+      if(!isMulti){
+        sel.checked = (pickedName===opt.name);
+      } else {
+        sel.checked = !!(pick && pick.multi && pick.items && pick.items[opt.name]);
+      }
+
+      sel.onclick=function(){
+        // ==============================
+        // ✅ 싱크대 세부(오른쪽): checkbox 멀티
+        // ==============================
+        if(isMulti){
+          var cur = getPick(section.name);
+          if(!cur || !cur.multi || !cur.items) cur = { multi:true, items:{} };
+
+          if(sel.checked){
+            // ✅ 멀티 선택(checkbox)
+            //  - 싱크대 세부(오른쪽)는 기존 연동 규칙(calcRightItem) 적용
+            //  - 그 외(예: 냉장고, 가전 키큰장)는 엑셀 단가(opt.unit) 그대로 사용
+            var cal = isSinkRight ? calcRightItem(section, opt.name, opt.unit, opt.manual)
+                                 : { unit: (opt.manual ? 0 : Number(opt.unit||0)), manual: !!opt.manual };
+            var prev = (cur.items && cur.items[opt.name]) ? cur.items[opt.name] : null;
+            // ✅ 기본 수량: 이전값이 있으면 유지, 없으면 빈값(0). (baseQty 자동입력 사용 안 함)
+            var qty = prev ? Number(prev.qty||0) : 0;
+            var qtyRaw = prev ? (prev.qtyRaw!=null ? String(prev.qtyRaw) : (qty?String(qty):"")) : "";
+            cur.items[opt.name] = { name: opt.name, unit: cal.unit, qty: qty, qtyRaw: qtyRaw, manual: cal.manual };
+            state.rightActive = { section: section.name, opt: opt.name };
+          } else {
+            if(cur.items && cur.items[opt.name]) delete cur.items[opt.name];
+            if(state.rightActive && state.rightActive.section===section.name && state.rightActive.opt===opt.name){
+              state.rightActive = null;
+            }
+          }
+
+          // items가 비면 중분류 자체를 삭제
+          var hasAny=false;
+          for(var k in cur.items){ if(cur.items.hasOwnProperty(k)){ hasAny=true; break; } }
+          if(!hasAny){
+            clearPick(section.name);
+          } else {
+            setPick(section.name, cur);
+          }
+
+          updateRightPanel();
+          computeTotals();
+          buildSectionList();
+          return;
+        }
+
+        // ==============================
+        // ✅ 기존/일반: radio 단일(기존 로직 유지)
+        // ==============================
+
+
+        // ============================================================
+        // ✅ (추가) 싱크대 세부 > 대리석 연동
+        // - 기준(옵션 먼저 선택) > 대리석 상판의 unit(단가)을 가져온다.
+        // - (~700폭): 단가=기준unit, 수량은 사용자 입력(기본 1)
+        // - (700~900폭): 단가=기준unit, 수량은 1.5 고정(입력 불가)
+        // ============================================================
+        if(section.tag==="오른쪽" && section.name==="대리석"){
+          var baseAmount = getBaseAmountForMarble();
+
+          if(opt.name==="대리석 (~700폭)"){
+            // 사용자가 수량을 입력하므로 기존 입력이 있으면 유지, 없으면 1
+            var prev = getPick(section.name);
+            var prevQty = (prev && prev.name==="대리석 (~700폭)" && prev.qty!=null) ? Number(prev.qty) : 0;
+
+            setPick(section.name, { name: opt.name, unit: baseAmount, qty: prevQty, qtyRaw: String(prevQty), manual:false, qtyLocked:false });
+            updateRightPanel();
+            computeTotals();
+            buildSectionList();
+            return;
+          }
+
+          if(opt.name==="대리석 (700~900폭)"){
+            // [대리석 700~900폭]
+            // - 기준(옵션 먼저 선택)에서 선택된 "대리석 상판" 금액(baseAmount)을 가져온다
+            // - 이 중분류는 baseAmount × 1.5 를 '단가(unit)'로 사용한다 (예: 340,000 × 1.5 = 510,000)
+            // - 수량은 사용자가 입력 가능(잠금 없음), 기본값은 1
+            var derivedUnit = Math.round(baseAmount * 1.5); // 1.5배 단가
+            var _qty = 0;              // 기본 수량(빈값)
+            var _qtyRaw = "";         // 기본 수량 문자열(입력 박스 표시용)         // 기본 수량 문자열(입력 박스 표시용)
+            setPick(section.name,{
+              name: opt.name,
+              unit: derivedUnit,       // ✅ 단가를 510,000으로 저장
+              qty: _qty,               // ✅ 수량은 사용자가 변경
+              qtyRaw: _qtyRaw,
+              qtyLocked: false,
+              manual: false
+            });
+            updateRightPanel();
+            computeTotals();
+            buildSectionList();
+            return;
+          }
+        }
+
+        var curPick=getPick(section.name);
+
+        var qty = (curPick && curPick.qty!=null) ? Number(curPick.qty) : 0;
+        var qtyRaw = (curPick && curPick.qtyRaw!=null) ? String(curPick.qtyRaw) : "";
+
+        // ✅ [요청 반영] 싱크대 세부 > 대리석만 특별 계산
+        if(section.tag==="오른쪽" && section.name==="상부장" && opt.name==="주방 후드"){
+          // ✅ [연동 규칙] 싱크대 세부 > 상부장 > 주방 후드
+          // 1) 기준 데이터 출처: 기존(옵션 먼저 선택) > 주방 후드
+          // 2) 기준금액(=표시 단가) = 기준 단가 × 기준 수량
+          // 3) 이 화면의 수량은 '사용자 입력 수량'(추가 배수)이며, 금액 = 표시 단가 × 사용자 수량
+          var hoodPick = (state.saved && state.saved["싱크대"]) ? state.saved["싱크대"]["주방 후드"] : null;
+          var hoodUnit = hoodPick ? Number(hoodPick.unit || 0) : 0; // 기준 단가
+          var hoodQty  = hoodPick ? Number(hoodPick.qty  || 0) : 0; // 기준 수량(옵션 먼저 선택에서 입력)
+          var baseTotal = hoodUnit * hoodQty; // 기준금액(=표시 단가)
+
+          // ✅ 선택 시 사용자 수량은 항상 1로 시작(이 화면에서 자유롭게 변경)
+          var userQty = 1;
+          setPick(section.name, { name: opt.name, unit: baseTotal, qty: userQty, qtyRaw: String(userQty), manual:false });
+        } else if(section.tag==="오른쪽" && section.name==="대리석"){
+          // [싱크대 세부 > 대리석] 연동 규칙 (주방후드 방식과 동일하게 단가/수량/금액 구조로 통일)
+          // - 기준(baseTotal): "기존(옵션 먼저 선택) > 대리석 상판"에서 계산된 **총 금액(총액)**.
+          // - 대리석(~700폭)    : 단가 = baseTotal
+          // - 대리석(700~900폭) : 단가 = baseTotal * 1.5
+          // - 수량: 두 옵션 모두 사용자가 입력(고정 1.5 사용 안 함)
+          // - 금액 = 단가 * 수량
+          // ✅ 목적: 리스트의 "금액"(340,000 / 510,000)과 오른쪽 패널 "단가"가 동일하게 나오도록 맞춘다.
+
+          // (1) 기존(옵션 먼저 선택)에서 저장된 "대리석 상판" 결과를 가져온다.
+          //     - state.saved["싱크대"]["대리석 상판"] 형태로 저장되어 있음(기존 로직 그대로 활용)
+          var basePick = (state.saved && state.saved["싱크대"]) ? state.saved["싱크대"]["대리석 상판"] : null;
+
+          // (2) basePick에서 "총 금액"을 안전하게 숫자로 복원한다.
+          //     - total / amount가 있으면 그걸 사용
+          //     - 없으면 unit * qty로 총액을 계산
+          var baseTotal = basePick
+            ? Number(
+                basePick.total ||
+                basePick.amount ||
+                (Number(basePick.unit || 0) * Number(basePick.qty || 1))
+              )
+            : 0;
+
+          // (3) 현재 선택 옵션에 따라 단가 계산
+          var unit = baseTotal;
+          if (String(opt.name || "").indexOf("700~900폭") >= 0) {
+              unit = Math.round(baseTotal * 1.5);
+          }
+
+          // (4) 수량: 이전에 사용자가 입력한 값이 있으면 유지, 없으면 1
+          //     - qtyLocked = false 로 두어 항상 입력 가능
+          var prevPick = getPick(section.name);
+          var prevQty = (prevPick && prevPick.name === opt.name) ? parseFloat(prevPick.qtyRaw || prevPick.qty) : NaN;
+          var qty = (isFinite(prevQty) && prevQty > 0) ? prevQty : 1;
+
+          // (5) 선택 결과 저장 (localStorage)
+          setPick(section.name, {
+              name: opt.name,
+              unit: unit,            // 오른쪽 패널 "단가"
+              qty: qty,              // 계산용 수량(숫자)
+              qtyRaw: (qtyRaw!=="" ? qtyRaw : (qty?String(qty):"")),   // 입력창 바인딩(문자열)
+              qtyLocked: false,      // ✅ 입력 가능
+              manual: false
+          });
+
+          // (6) 리스트(표)의 "금액" 컬럼도 단가와 동일하게 보이도록 opt.price를 단가로 맞춘다.
+          opt.price = unit;
+      } else if(opt.manual){
+          var keepUnit=(curPick && curPick.name===opt.name && curPick.unit!=null) ? curPick.unit : 0;
+          setPick(section.name, { name: opt.name, unit: keepUnit, qty: qty, manual:true });
+        } else {
+          setPick(section.name, { name: opt.name, unit: opt.unit, qty: qty, manual:false });
+        }
+
+        renderOptions();
+        updateRightPanel();
+        computeTotals();
+        buildSectionList();
+
+        if(isManualPick(section.name, getPick(section.name))){
+          setTimeout(function(){
+            var u=document.getElementById("unitInput");
+            if(u && !u.classList.contains("hidden")) u.focus();
+          },0);
+        }
+      
+      };
+      // ✅ 오른쪽(싱크대 세부): 행 클릭 = '활성화' 우선 + (미체크면 체크까지)
+// - 행을 누르면 해당 항목이 우측 패널의 '편집 대상(활성 항목)'이 된다.
+// - 아직 체크되지 않은 행이면: 체크 → 선택 추가(기존 onclick 로직 호출)
+// - 이미 체크된 행이면: 체크는 유지하고 활성 항목만 변경(해제는 체크박스를 직접 클릭)
+      if(isMulti){
+        tr.addEventListener("click", function(e){
+          // ✅ 라인 클릭 = 체크 토글(켜짐/꺼짐) + 활성 항목 전환
+          if(e.target === sel) return; // 체크박스 클릭은 기본 onclick 흐름을 그대로 사용
+          sel.checked = !sel.checked;
+
+          // 활성 항목은 항상 클릭한 라인으로 이동
+          state.rightActive = { section: section.name, opt: opt.name };
+
+          // 기존 선택/해제 로직 재사용
+          sel.onclick();
+
+          // 체크를 풀었다면: 남아있는 체크 항목이 있으면 그 중 하나로 활성 이동(우측 패널 공백 방지)
+          if(!sel.checked){
+            var p = getPick(section.name);
+            if(p && p.multi && p.items){
+              var ks = Object.keys(p.items);
+              if(ks.length){
+                state.rightActive = { section: section.name, opt: ks[0] };
+              }
+            }
+          }
+
+          updateRightPanel();
+        });
+
+        // ✅ 체크박스 직접 클릭도: 활성 항목 전환 + (해제 시) 다른 체크 항목으로 활성 이동
+        sel.addEventListener("click", function(){
+          state.rightActive = { section: section.name, opt: opt.name };
+          setTimeout(function(){
+            if(!sel.checked){
+              var p = getPick(section.name);
+              if(p && p.multi && p.items){
+                var ks = Object.keys(p.items);
+                if(ks.length){
+                  state.rightActive = { section: section.name, opt: ks[0] };
+                }
+              }
+            }
+            updateRightPanel();
+          }, 0);
+        });
+      }
+
+      tdSel.appendChild(sel);
+
+      var tdName=document.createElement("td");
+      tdName.textContent=opt.name;
+
+      var tdPrice=document.createElement("td");
+      tdPrice.className="num";
+      if(opt.manual){
+        tdPrice.textContent="-";
+      } else if(section.tag==="오른쪽"){
+        // ✅ 싱크대 세부(오른쪽) 표의 '금액'은 (단가 × 사용자입력 수량)만 반영한다.
+        // - 예시/기본수량(opt.baseQty)은 절대 자동 반영하지 않는다.
+        // - 체크되어 저장된 항목만 qty를 가지고, 그 외에는 0으로 표시한다.
+        var cal = calcRightItem(section, opt.name, opt.unit, opt.manual);
+
+        var qtyEff = 0;
+        var curPick2 = getPick(section.name);
+
+        if(curPick2 && curPick2.multi && curPick2.items && curPick2.items[opt.name]){
+          qtyEff = Number(curPick2.items[opt.name].qty||0);
+        }
+        // (호환) 단일 선택 케이스
+        else if(curPick2 && !curPick2.multi && curPick2.name===opt.name && curPick2.qty!=null){
+          qtyEff = Number(curPick2.qty||0);
+        }
+
+        if(!isFinite(qtyEff) || qtyEff<0) qtyEff = 0;
+
+        var disp = (Number(qtyEff||0) > 0) ? (Number(cal.unit||0) * Number(qtyEff||0)) : Number(cal.unit||0);
+        tdPrice.textContent = fmtWon(disp);
+      } else {
+        tdPrice.textContent = fmtWon(opt.unit);
+      }
+
+      tr.appendChild(tdSel); tr.appendChild(tdName); tr.appendChild(tdPrice);
+      tbody.appendChild(tr);
+    })(section.options[i]);
+  }
+
+  updateRightPanel();
+}
+
+/* computeTotals()
+   - 현재 대분류의 모든 중분류 선택값을 합산해 '시트 합계/전체 합계'를 갱신한다.
+   - 연동 규칙이 적용된 pick은 unit 자체가 '기준금액'일 수 있으므로,
+     합계는 기본적으로 unit×qty 로 계산한다. */
+
+function computeTotals(){
+  ensureSaved();
+
+  // ✅ 시트별 "합계 제외" 중분류 목록 생성
+  // - 싱크대: tag === '기존'(옵션 먼저 선택) 은 합계에서 제외
+  // - 추가 안전장치: isBaseSectionName() 조건도 함께 적용
+  var excludeBySheet = {};
+  for(var i=0;i<state.book.sheets.length;i++){
+    var sh = state.book.sheets[i];
+    var secs = parseSheetToSections(sh);
+    var ex = {};
+    for(var j=0;j<secs.length;j++){
+      var sec = secs[j];
+      if(sh.name==="싱크대" && sec.tag==="기존") ex[sec.name]=true;
+      if(isBaseSectionName && isBaseSectionName(sec.name)) ex[sec.name]=true;
+    }
+    excludeBySheet[sh.name] = ex;
+  }
+
+  // ✅ 현재 시트 합계
+  var sk=getSheetKey();
+  var m=state.saved[sk]||{};
+  var sheetSum=0;
+  var exCur = excludeBySheet[sk] || {};
+  for(var k in m){
+    if(!m.hasOwnProperty(k)) continue;
+    if(exCur[k]) continue; // ✅ 합계 제외
+    var p=m[k];
+    if(p && p.multi && p.items){
+      for(var kk in p.items){
+        if(!p.items.hasOwnProperty(kk)) continue;
+        var it=p.items[kk];
+        sheetSum += (Number(it.unit||0) * Number(it.qty||0));
+      }
+    } else {
+      sheetSum += (Number(p.unit||0) * Number(p.qty||0));
+    }
+  }
+
+  // ✅ 전체 합계
+  var grand=0;
+  for(var sName in state.saved){
+    if(!state.saved.hasOwnProperty(sName)) continue;
+    var mm=state.saved[sName]||{};
+    var exAll = excludeBySheet[sName] || {};
+    for(var kk in mm){
+      if(!mm.hasOwnProperty(kk)) continue;
+      if(exAll[kk]) continue; // ✅ 합계 제외
+      var pp=mm[kk];
+      if(pp && pp.multi && pp.items){
+        for(var k2 in pp.items){
+          if(!pp.items.hasOwnProperty(k2)) continue;
+          var it2=pp.items[k2];
+          grand += (Number(it2.unit||0) * Number(it2.qty||0));
+        }
+      } else {
+        grand += (Number(pp.unit||0) * Number(pp.qty||0));
+      }
+    }
+  }
+
+  document.getElementById("sheetTotal").textContent=fmtWon(sheetSum);
+  document.getElementById("grandTotal").textContent=fmtWon(grand);
+  // ✅ 탭(대분류) 우측 금액 표시 갱신
+  buildSheetTabs();
+  // ✅ UI 개선(v63): 선택 목록 갱신
+  renderPickedList();
+}
+
+
+// ===========================
+// ✅ UI 개선(v63): 선택 목록 테이블(이 시트) 렌더/수정/삭제
+// - 로직(계산/저장)은 그대로 두고, 사용자가 보기/수정 쉽게 만드는 UI만 추가
+// ===========================
+function getExcludeMapForCurrentSheet(){
+  var sheetName = getSheetKey();
+  var sh = state.book.sheets[state.sheetIndex];
+  var secs = parseSheetToSections(sh);
+  var ex = {};
+  for(var j=0;j<secs.length;j++){
+    var sec = secs[j];
+    if(sheetName==="싱크대" && sec.tag==="기존") ex[sec.name]=true;
+    if(isBaseSectionName && isBaseSectionName(sec.name)) ex[sec.name]=true;
+  }
+  return ex;
+}
+
+function parseQtyText(txt){
+  if(txt===null || txt===undefined) return 0;
+  var t = String(txt).replace(/,/g,"").trim();
+  if(!t) return 0;
+  var n = Number(t);
+  return (isFinite(n) && n>=0) ? n : 0;
+}
+
+function renderPickedList(){
+  var body = document.getElementById("pickedListBody");
+  var cntEl = document.getElementById("pickedListCount");
+  if(!body || !cntEl) return;
+
+  ensureSaved();
+  var sheetName = getSheetKey();
+  var mm = state.saved[sheetName] || {};
+  var ex = getExcludeMapForCurrentSheet();
+
+  body.innerHTML = "";
+  var rows = [];
+
+  function pushRow(sectionName, itemKey, item){
+    var unit = Number(item.unit||0);
+    var qty = Number(item.qty||0);
+    rows.push({
+      sectionName: sectionName,
+      itemKey: itemKey,
+      name: item.name || "-",
+      unit: unit,
+      qty: qty,
+      qtyRaw: (item.qtyRaw!==undefined && item.qtyRaw!==null) ? String(item.qtyRaw) : String(qty),
+      amt: unit * qty
+    });
+  }
+
+  for(var secName in mm){
+    if(!mm.hasOwnProperty(secName)) continue;
+    if(ex[secName]) continue;
+
+    var p = mm[secName];
+    if(!p) continue;
+
+    if(p.multi && p.items){
+      for(var k in p.items){
+        if(!p.items.hasOwnProperty(k)) continue;
+        pushRow(secName, k, p.items[k]);
+      }
+    } else {
+      pushRow(secName, "", p);
+    }
+  }
+
+  cntEl.textContent = rows.length + "개";
+
+  if(rows.length===0){
+    var tr = document.createElement("tr");
+      tr.classList.add("clickRow");
+      // ✅ UI 개선(v70): 리스트에서 클릭한 항목을 "편집 대상"으로 지정(오른쪽 상단/입력칸과 동기화)
+      try{
+        if(state.rightActive && state.rightActive.section===r.sectionName && state.rightActive.opt===r.itemKey){
+          tr.classList.add("activeRow");
+        }
+      }catch(e){}
+      tr.onclick = function(ev){
+        var t = ev && ev.target ? ev.target.tagName : "";
+        if(t==="INPUT" || t==="BUTTON") return; // 입력/삭제는 기존 동작 유지
+        state.rightActive = { section: r.sectionName, opt: r.itemKey };
+        updateRightPanel();
+        renderPickedList();
+      };
+var td = document.createElement("td");
+    td.colSpan = 6;
+    td.className = "muted";
+    td.textContent = "선택된 항목이 없습니다.";
+    tr.appendChild(td);
+    body.appendChild(tr);
+    return;
+  }
+
+  for(var i=0;i<rows.length;i++){
+    (function(r){
+      var tr = document.createElement("tr");
+
+      var tdSec = document.createElement("td");
+      tdSec.textContent = r.sectionName;
+      tr.appendChild(tdSec);
+
+      var tdName = document.createElement("td");
+      tdName.textContent = r.name;
+      tr.appendChild(tdName);
+
+      var tdUnit = document.createElement("td");
+      tdUnit.className = "num";
+      tdUnit.textContent = fmtWon(r.unit);
+      tr.appendChild(tdUnit);
+
+      var tdQty = document.createElement("td");
+      var inp = document.createElement("input");
+      inp.type = "text";
+      inp.inputMode = "decimal";
+      inp.value = r.qtyRaw;
+      inp.onchange = function(){ listSetQty(r.sectionName, r.itemKey, inp.value); };
+      tdQty.appendChild(inp);
+      tr.appendChild(tdQty);
+
+      var tdAmt = document.createElement("td");
+      tdAmt.className = "num";
+      tdAmt.textContent = fmtWon(r.amt);
+      tr.appendChild(tdAmt);
+
+      var tdDel = document.createElement("td");
+      var btn = document.createElement("button");
+      btn.className = "btnDanger";
+      btn.textContent = "삭제";
+      btn.onclick = function(){ listRemoveItem(r.sectionName, r.itemKey); };
+      tdDel.appendChild(btn);
+      tr.appendChild(tdDel);
+
+      body.appendChild(tr);
+    })(rows[i]);
+  }
+}
+
+function listSetQty(sectionName, itemKey, txt){
+  ensureSaved();
+  var sk = getSheetKey();
+  var p = (state.saved[sk]||{})[sectionName];
+  if(!p) return;
+
+  var q = parseQtyText(txt);
+
+  if(p.multi && p.items){
+    var it = p.items[itemKey];
+    if(!it) return;
+    it.qtyRaw = String(txt);
+    it.qty = q;
+    p.items[itemKey] = it;
+    state.saved[sk][sectionName] = p;
+    saveAll(state.saved);
+  } else {
+    p.qtyRaw = String(txt);
+    p.qty = q;
+    state.saved[sk][sectionName] = p;
+    saveAll(state.saved);
+  }
+
+  refreshAllViews();
+}
+
+function listRemoveItem(sectionName, itemKey){
+  ensureSaved();
+  var sk = getSheetKey();
+  var p = (state.saved[sk]||{})[sectionName];
+  if(!p) return;
+
+  if(p.multi && p.items){
+    delete p.items[itemKey];
+    var any=false;
+    for(var k in p.items){ if(p.items.hasOwnProperty(k)){ any=true; break; } }
+    if(!any) delete state.saved[sk][sectionName];
+    else state.saved[sk][sectionName] = p;
+    saveAll(state.saved);
+  } else {
+    delete state.saved[sk][sectionName];
+    saveAll(state.saved);
+  }
+
+  refreshAllViews();
+}
+
+function clearCurrentSheetPicks(){
+  ensureSaved();
+  var sk = getSheetKey();
+  state.saved[sk] = {};
+  saveAll(state.saved);
+
+  refreshAllViews();
+}
+
+
+
+function loadSheet(idx){
+  state.sheetIndex=idx;
+
+  var sheet=state.book.sheets[state.sheetIndex];
+  state.sectionsCache=parseSheetToSections(sheet);
+
+  buildSheetTabs();
+
+  // ✅ 검색어 기준으로 "첫 번째 보이는 중분류"로 자동 선택
+  state.sectionIndex = getFirstVisibleSectionIndex();
+
+  buildSectionList();
+
+  if(state.sectionsCache.length>0) renderOptions();
+  else {
+    document.getElementById("curSheet").textContent=sheet.name;
+    document.getElementById("curSection").textContent="-";
+    document.getElementById("optionsBody").innerHTML="";
+    updateRightPanel();
+  }
+  computeTotals();
+}
+
+function loadSection(idx){
+  state.sectionIndex=idx;
+  buildSectionList();
+  renderOptions();
+  computeTotals();
+}
+
+function onSearchChanged(){
+  buildSectionList();
+  var newIdx = getFirstVisibleSectionIndex();
+  if(newIdx !== state.sectionIndex){
+    state.sectionIndex = newIdx;
+    renderOptions();
+  }
+  computeTotals();
+}
+
+/* wire()
+   - DOM 이벤트(검색, 수량 입력, 단가 입력, 초기화 버튼 등)를 한 번에 바인딩한다.
+   - 수량 입력 처리:
+     - 기존(옵션 먼저 선택): 정수만 허용
+     - 싱크대 세부(오른쪽): 소수점 3자리까지 허용
+     - 연동 항목도 수량을 강제로 되돌리지 않고 사용자가 수정 가능(v32) */
+
+function wire(){
+  document.getElementById("q").addEventListener("input", onSearchChanged);
+
+  // ⛔ 기존(옵션 먼저 선택) : 소수점 키 입력 자체 차단
+  document.getElementById("qty").addEventListener("keydown", function(e){
+    var section=state.sectionsCache[state.sectionIndex];
+    if(!section) return;
+    if(section.tag !== "오른쪽"){
+      if(e.key === "." || e.key === "," ){
+        e.preventDefault();
+        return false;
+      }
+    }
+  });
+
+  // ⛔ 기존(옵션 먼저 선택): 숫자 키 외 모든 키 입력 차단 (문자/점/기호 전부 금지)
+  document.getElementById("qty").addEventListener("keydown", function(e){
+    var section = state.sectionsCache[state.sectionIndex];
+    if(!section) return;
+
+    if(section.tag !== "오른쪽"){
+      // 허용 키: 숫자, 백스페이스, 삭제, 화살표, 탭
+      var allowed =
+        (e.key >= '0' && e.key <= '9') ||
+        e.key === 'Backspace' ||
+        e.key === 'Delete' ||
+        e.key === 'ArrowLeft' ||
+        e.key === 'ArrowRight' ||
+        e.key === 'Tab';
+
+      if(!allowed){
+        e.preventDefault();
+        return false;
+      }
+    }
+  });
+
+
+
+  // ✅ 수량 입력 즉시 반영 (입력중에도 금액/합계 갱신)
+  document.getElementById("qty").addEventListener("input", function(){
+    var section=state.sectionsCache[state.sectionIndex];
+    if(!section) return;
+    var pick=getPick(section.name);
+    if(!pick) return;
+
+    var allowDecimal = (section && section.tag === "오른쪽");
+    var raw = this.value || "";
+
+    // 오른쪽 멀티 활성 항목 여부
+    var isActiveMulti = (pick.multi && pick.items && state.rightActive && state.rightActive.section===section.name && pick.items[state.rightActive.opt]);
+
+    if(!allowDecimal){
+      // 숫자만
+      raw = raw.replace(/[^0-9]/g, "");
+      this.value = raw;
+      var n = parseInt(raw, 10);
+      var qtyVal = (isFinite(n) ? n : 0);
+
+      if(isActiveMulti){
+        pick.items[state.rightActive.opt].qtyRaw = raw;
+        pick.items[state.rightActive.opt].qty = qtyVal;
+      } else {
+        pick.qtyRaw = raw;
+        pick.qty = qtyVal;
+      }
+    } else {
+      // 소수 허용: 숫자 + '.'
+      raw = raw.replace(/[^0-9.]/g, "");
+      // 점 2개 이상 방지
+      var parts = raw.split('.');
+      if(parts.length>2){
+        raw = parts[0] + '.' + parts.slice(1).join('');
+      }
+      this.value = raw;
+
+      var f = parseFloat(raw);
+      var qtyVal2 = (isFinite(f) ? f : 0);
+
+      if(isActiveMulti){
+        pick.items[state.rightActive.opt].qtyRaw = raw;
+        pick.items[state.rightActive.opt].qty = qtyVal2;
+      } else {
+        pick.qtyRaw = raw;
+        pick.qty = qtyVal2;
+      }
+    }
+
+    setPick(section.name, pick);
+    updateRightPanel();
+    computeTotals();
+    buildSectionList();
+  });
+
+document.getElementById("qty").addEventListener("blur", function(){
+    var section=state.sectionsCache[state.sectionIndex];
+    var pick=getPick(section.name);
+    if(!pick) return;
+
+    var allowDecimal = (section && section.tag === "오른쪽");
+    var raw = this.value || "";
+
+    // ✅ checkbox 멀티(오른쪽): pick.qty가 아니라 '활성 항목(it)'의 qty/qtyRaw를 갱신해야 함
+    var isActiveMulti = (pick.multi && pick.items && state.rightActive && state.rightActive.section===section.name && pick.items[state.rightActive.opt]);
+
+    if(!allowDecimal){
+      raw = raw.replace(/[^0-9]/g, "");
+      this.value = raw;
+      var n = parseInt(raw, 10);
+      var qtyVal = (isFinite(n) ? n : 0);
+
+      if(isActiveMulti){
+        pick.items[state.rightActive.opt].qtyRaw = raw;
+        pick.items[state.rightActive.opt].qty = qtyVal;
+      } else {
+        pick.qtyRaw = raw;
+        pick.qty = qtyVal;
+      }
+    } else {
+      // 끝에 '.'만 남아있으면 제거
+      if(raw.length>0 && raw.charAt(raw.length-1)==='.') raw = raw.substring(0, raw.length-1);
+      this.value = raw;
+      var f = parseFloat(raw);
+      var qtyVal2 = (isFinite(f) ? f : 0);
+
+      if(isActiveMulti){
+        pick.items[state.rightActive.opt].qtyRaw = raw;
+        pick.items[state.rightActive.opt].qty = qtyVal2;
+      } else {
+        pick.qtyRaw = raw;
+        pick.qty = qtyVal2;
+      }
+    }
+
+    setPick(section.name, pick);
+    updateRightPanel();
+    computeTotals();
+    buildSectionList();
+  });
+document.getElementById("unitInput").addEventListener("input", function(){
+    var section=state.sectionsCache[state.sectionIndex];
+    var pick=getPick(section.name);
+    if(!pick) return;
+
+    // ✅ 싱크대 세부(오른쪽) checkbox 멀티: 활성 항목의 단가(수동입력)를 수정
+    if(section && ((section.tag==="오른쪽") || section.multi===true) && pick.multi && pick.items){
+      var act = (state.rightActive && state.rightActive.section===section.name) ? state.rightActive.opt : null;
+      if(!act || !pick.items[act]) return;
+
+      var it = pick.items[act];
+      if(!it.manual) return; // 자동 단가는 입력 무시
+
+      var raw=this.value;
+      var u=parsePrice(raw);
+      it.unit = isFinite(u) ? u : 0;
+
+      setPick(section.name, pick);
+      updateRightPanel();
+      computeTotals();
+      buildSectionList();
+      buildSheetTabs();
+      return;
+    }
+
+    // 기존 단일 선택 수동입력
+    pick.unit = parsePrice(this.value);
+    if(!isFinite(pick.unit) || pick.unit<0) pick.unit=0;
+
+    setPick(section.name,pick);
+    updateRightPanel();
+    computeTotals();
+    buildSectionList();
+    buildSheetTabs();
+  });
+
+  document.getElementById("btnClearPick").addEventListener("click", function(){
+    var section=state.sectionsCache[state.sectionIndex];
+    clearPick(section.name);
+    updateRightPanel();
+    renderOptions();
+    computeTotals();
+    buildSectionList();
+  });
+
+  document.getElementById("btnResetSheet").addEventListener("click", function(){
+    ensureSaved();
+    var sk=getSheetKey();
+    state.saved[sk]={};
+    saveAll(state.saved);
+    updateRightPanel();
+    renderOptions();
+    computeTotals();
+    buildSectionList();
+  });
+
+  document.getElementById("btnResetAll").addEventListener("click", function(){
+    state.saved={};
+    saveAll(state.saved);
+    updateRightPanel();
+    renderOptions();
+    computeTotals();
+    buildSectionList();
+  });
+
+  // ✅ UI 개선(v63): 이 시트 선택 전체 해제(오른쪽 목록)
+  var _btnClearSheet = document.getElementById("btnClearSheetPicks");
+  if(_btnClearSheet){
+    _btnClearSheet.addEventListener("click", function(){
+      if(confirm("현재 시트의 선택 항목을 모두 지울까요?")) clearCurrentSheetPicks();
+    });
+  }
+}
+
+
+/* ============================================================
+   ✅ 전체 확인(오버뷰) UI (v64)
+   - 로직(계산/저장/연동)은 그대로 두고, 사용자가
+     "내가 뭘 선택했고 어떻게 입력했는지"를 전체로 확인할 수 있는 화면을 추가
+   - 포함 내용: 모든 시트의 선택 항목(멀티 포함) + 수량 + 금액 + 시트별 소계/전체 합계
+   ============================================================ */
+
+function getExcludedSectionsForSheet(sheetName){
+  // buildSheetTabs()의 합계 제외 규칙과 동일하게 맞춘다.
+  var ex = {};
+  for(var i=0;i<state.book.sheets.length;i++){
+    var sh = state.book.sheets[i];
+    if(sh.name !== sheetName) continue;
+    var secs = parseSheetToSections(sh);
+    for(var j=0;j<secs.length;j++){
+      var sec = secs[j];
+      // 싱크대 '기존' 및 '기준(옵션...)' 섹션은 합계/오버뷰에서 제외
+      if(sheetName==="싱크대" && sec.tag==="기존") ex[sec.name]=true;
+      if(typeof isBaseSectionName==="function" && isBaseSectionName(sec.name)) ex[sec.name]=true;
+    }
+  }
+  return ex;
+}
+
+function getAllOverviewRows(){
+  ensureSaved();
+  var rows = [];
+  var sheetSub = {};
+  var pickedCount = 0;
+
+  for(var si=0; si<state.book.sheets.length; si++){
+    var sheetName = state.book.sheets[si].name;
+    var mm = state.saved[sheetName] || {};
+    var ex = getExcludedSectionsForSheet(sheetName);
+
+    sheetSub[sheetName] = 0;
+
+    for(var mid in mm){
+      if(!mm.hasOwnProperty(mid)) continue;
+      if(ex[mid]) continue;
+
+      var p = mm[mid];
+      if(!p) continue;
+
+      // 멀티(체크박스 누적)
+      if(p.multi && p.items){
+        for(var key in p.items){
+          if(!p.items.hasOwnProperty(key)) continue;
+          var it = p.items[key] || {};
+          // 체크된 항목은 items에 들어온다.
+          var unit = Number(it.unit||0);
+          var qty  = Number(it.qty ||0);
+          var amt  = unit * qty;
+
+          pickedCount++;
+
+          rows.push({
+            sheet: sheetName,
+            mid: mid,
+            name: it.name || key,
+            unit: unit,
+            qty: qty,
+            amt: amt,
+            type: "multi",
+            itemKey: key
+          });
+
+          sheetSub[sheetName] += amt;
+        }
+      } else {
+        // 단일(기존 방식)
+        var unit2 = Number(p.unit||0);
+        var qty2  = Number(p.qty ||0);
+        var amt2  = unit2 * qty2;
+
+        // 사용자가 '선택 해제'를 안 하고 0만 남겨둔 경우도 확인 화면엔 보여주고 싶을 수 있다.
+        // 다만 과도한 노이즈를 막기 위해 name이 있는 경우만 표시한다.
+        if(p.name){
+          pickedCount++;
+          rows.push({
+            sheet: sheetName,
+            mid: mid,
+            name: p.name,
+            unit: unit2,
+            qty: qty2,
+            amt: amt2,
+            type: "single"
+          });
+          sheetSub[sheetName] += amt2;
+        }
+      }
+    }
+  }
+
+  // 정렬: 시트 -> 중분류
+  rows.sort(function(a,b){
+    if(a.sheet !== b.sheet) return a.sheet.localeCompare(b.sheet,"ko");
+    if(a.mid !== b.mid) return a.mid.localeCompare(b.mid,"ko");
+    return String(a.name||"").localeCompare(String(b.name||""),"ko");
+  });
+
+  return { rows: rows, sheetSub: sheetSub, pickedCount: pickedCount };
+}
+
+function renderOverview(){
+  var box = document.getElementById("overviewBody");
+  var grandEl = document.getElementById("overviewGrand");
+  var statsEl = document.getElementById("overviewStats");
+  if(!box || !grandEl) return;
+
+  var data = getAllOverviewRows();
+  var rows = data.rows;
+  var sheetSub = data.sheetSub;
+
+  // tbody 생성
+  box.innerHTML = "";
+
+  var curSheet = null;
+  var curMid = null;
+  var grand = 0;
+
+  function addGroupRow(label, cls, sub){
+    var tr = document.createElement("tr");
+    tr.className = cls;
+    var td = document.createElement("td");
+    td.colSpan = 7;
+    td.textContent = sub ? (label + " · 소계 " + fmtWon(sub) + "원") : label;
+    tr.appendChild(td);
+    box.appendChild(tr);
+  }
+
+  for(var i=0;i<rows.length;i++){
+    var r = rows[i];
+
+    if(curSheet !== r.sheet){
+      curSheet = r.sheet;
+      curMid = null;
+      var sub = Number(sheetSub[curSheet]||0);
+      addGroupRow("■ " + curSheet, "ovGroup", sub);
+    }
+    if(curMid !== r.mid){
+      curMid = r.mid;
+      addGroupRow("  - " + curMid, "ovSub");
+    }
+
+    grand += Number(r.amt||0);
+
+    var tr = document.createElement("tr");
+
+    var tdSheet = document.createElement("td"); tdSheet.textContent = r.sheet;
+    var tdMid   = document.createElement("td"); tdMid.textContent = r.mid;
+    var tdName  = document.createElement("td"); tdName.textContent = r.name || "-";
+    var tdUnit  = document.createElement("td"); tdUnit.className="num"; tdUnit.textContent = fmtWon(Number(r.unit||0));
+    var tdQty   = document.createElement("td"); tdQty.className="num";
+
+    // 수량을 오버뷰에서 바로 수정 가능(PC 편의)
+    var inp = document.createElement("input");
+    inp.type = "text";
+    inp.value = (r.qty===null || r.qty===undefined) ? "0" : String(r.qty);
+    inp.style.width = "100%";
+    inp.style.padding = "8px";
+    inp.style.borderRadius = "10px";
+    inp.style.border = "1px solid #e5e7eb";
+    inp.setAttribute("inputmode", "decimal");
+    inp.onchange = (function(rr){
+      return function(){
+        // 입력값 정규화(빈값 -> 0)
+        var v = String(this.value||"").trim();
+        if(!v) v = "0";
+        // 소수/정수 모두 허용
+        v = v.replace(/,/g,"");
+        var n = Number(v);
+        if(!isFinite(n) || n<0) n = 0;
+
+        // 저장 반영
+        ensureSaved();
+        if(!state.saved[rr.sheet]) state.saved[rr.sheet] = {};
+        var p = state.saved[rr.sheet][rr.mid];
+        if(p && p.multi && p.items){
+          var it = p.items[rr.itemKey] || {};
+          it.qty = n;
+          it.qtyRaw = String(n);
+          p.items[rr.itemKey] = it;
+          state.saved[rr.sheet][rr.mid] = p;
+        } else if(p){
+          p.qty = n;
+          p.qtyRaw = String(n);
+          state.saved[rr.sheet][rr.mid] = p;
+        }
+        saveAll(state.saved);
+
+        // 화면/합계 갱신
+        computeTotals();
+        buildSheetTabs();
+        buildSectionList();
+        renderOverview();
+        // 현재 시트/중분류 화면도 즉시 동기화(가능하면)
+        updateRightPanel();
+      };
+    })(r);
+
+    tdQty.appendChild(inp);
+
+    var tdAmt = document.createElement("td"); tdAmt.className="num"; tdAmt.textContent = fmtWon(Number(r.amt||0));
+    var tdAct = document.createElement("td");
+
+    var btnDel = document.createElement("button");
+    btnDel.textContent = "삭제";
+    btnDel.onclick = (function(rr){
+      return function(){
+        ensureSaved();
+        if(!state.saved[rr.sheet]) return;
+        var p = state.saved[rr.sheet][rr.mid];
+        if(p && p.multi && p.items){
+          delete p.items[rr.itemKey];
+          // items가 비면 중분류 자체 제거
+          var left = 0;
+          for(var k in p.items){ if(p.items.hasOwnProperty(k)) left++; }
+          if(left===0) delete state.saved[rr.sheet][rr.mid];
+          else state.saved[rr.sheet][rr.mid] = p;
+        } else {
+          delete state.saved[rr.sheet][rr.mid];
+        }
+        saveAll(state.saved);
+        refreshAllViews();
+      };
+    })(r);
+
+    tdAct.appendChild(btnDel);
+
+    tr.appendChild(tdSheet);
+    tr.appendChild(tdMid);
+    tr.appendChild(tdName);
+    tr.appendChild(tdUnit);
+    tr.appendChild(tdQty);
+    tr.appendChild(tdAmt);
+    tr.appendChild(tdAct);
+
+    box.appendChild(tr);
+  }
+
+  grandEl.textContent = fmtWon(grand);
+  statsEl.textContent = "총 " + data.pickedCount + "건";
+}
+
+function openOverview(){
+  // 닫기 직후(클릭 버블) 재오픈 방지
+  if(state && state._overviewJustClosedAt && (Date.now() - state._overviewJustClosedAt) < 250) return;
+  var modal = document.getElementById("overviewModal");
+  if(!modal) return;
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden","false");
+  renderOverview();
+}
+function closeOverview(){
+  if(state) state._overviewJustClosedAt = Date.now();
+  var modal = document.getElementById("overviewModal");
+  if(!modal) return;
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden","true");
+}
+function refreshAllViews(){
+  // 모든 화면을 state.saved 기준으로 다시 동기화(체크박스/합계/목록/오버뷰)
+  computeTotals();
+  buildSheetTabs();
+  buildSectionList();
+  // 현재 보고 있는 옵션/우측 패널/선택 목록 갱신
+  if(state.sectionsCache && state.sectionsCache.length>0) renderOptions();
+  updateRightPanel();
+  renderPickedList();
+  // 오버뷰가 열려 있으면 오버뷰도 갱신
+  var m = document.getElementById("overviewModal");
+  if(m && !m.classList.contains("hidden")) renderOverview();
+}
+
+
+function printOverview(){
+  // 새 창(인쇄 전용)을 열고, 인쇄 다이얼로그가 닫히면(인쇄/취소 모두) 자동으로 창을 닫습니다.
+  var data = getAllOverviewRows();
+  var rows = data.rows;
+  var sheetSub = data.sheetSub;
+
+  var html = [];
+  html.push('<!doctype html><html lang="ko"><head><meta charset="utf-8"/>');
+  html.push('<meta name="viewport" content="width=device-width,initial-scale=1"/>');
+  html.push('<title>전체 확인 - 인쇄</title>');
+  html.push('<style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,\'Noto Sans KR\',sans-serif;color:#111827;margin:18px}');
+  html.push('table{border-collapse:collapse;width:100%}th,td{border:1px solid #e5e7eb;padding:6px 8px;font-size:12px}th{background:#f9fafb;text-align:left}.num{text-align:right}');
+  html.push('.g{background:#f3f4f6;font-weight:800}.s{background:#fafafa;font-weight:800}</style></head><body>');
+  html.push('<h2 style="margin:0 0 10px 0">전체 확인</h2>');
+  html.push('<div style="color:#6b7280;font-size:12px;margin-bottom:10px">• 모든 시트 선택/수량/금액 요약 (합계 제외 규칙 동일)</div>');
+  html.push('<table><thead><tr><th style="width:16%">시트</th><th style="width:18%">중분류</th><th>선택 항목</th><th class="num" style="width:10%">단가</th><th class="num" style="width:8%">수량</th><th class="num" style="width:12%">금액</th></tr></thead><tbody>');
+
+  var curSheet=null, curMid=null;
+  var grand=0;
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i];
+    if(curSheet!==r.sheet){
+      curSheet=r.sheet; curMid=null;
+      html.push('<tr class="g"><td colspan="6">■ '+escapeHtml(curSheet)+' · 소계 '+fmtWon(Number(sheetSub[curSheet]||0))+'원</td></tr>');
+    }
+    if(curMid!==r.mid){
+      curMid=r.mid;
+      html.push('<tr class="s"><td colspan="6">- '+escapeHtml(curMid)+'</td></tr>');
+    }
+    grand += Number(r.amt||0);
+    html.push('<tr><td>'+escapeHtml(r.sheet)+'</td><td>'+escapeHtml(r.mid)+'</td><td>'+escapeHtml(r.name)+'</td><td class="num">'+fmtWon(Number(r.unit||0))+'</td><td class="num">'+escapeHtml(r.qtyRaw)+'</td><td class="num">'+fmtWon(Number(r.amt||0))+'</td></tr>');
+  }
+  html.push('</tbody></table>');
+  html.push('<div style="margin-top:10px;text-align:right;font-weight:800">전체 합계: '+fmtWon(grand)+'원</div>');
+
+  // ★ 인쇄 후(또는 취소 후) 자동 닫기
+  html.push('<script>');
+  html.push('window.onafterprint=function(){ try{ window.close(); }catch(e){} };');
+  html.push('window.onload=function(){ setTimeout(function(){ try{ window.focus(); window.print(); }catch(e){} }, 50); };');
+  html.push('</'+'script>');
+
+  html.push('
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
+  });
+}
+</script>
+
+</body></html>');
+
+  var w = window.open("", "_blank");
+  if(!w){
+    alert("팝업이 차단되어 인쇄 창을 열 수 없습니다. 브라우저에서 팝업 허용 후 다시 시도해주세요.");
+    return;
+  }
+  w.document.open();
+  w.document.write(html.join(""));
+  w.document.close();
+}
+
+
+function escapeHtml(s){
+  s = String(s===null||s===undefined ? "" : s);
+  return s.replace(/[&<>"']/g, function(ch){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch];
+  });
+}
+
+function main(){
+  state.book=deepCopy(BOOK);
+  state.saved=loadSaved() || {};
+  wire();
+
+  // ✅ 전체 확인(오버뷰) 버튼/모달 이벤트 (v65: 버튼/연동 안정화)
+  function bindOnce(el, ev, fn){
+    if(!el) return;
+    el.addEventListener(ev, fn, {passive:false});
+  }
+
+  var ob=document.getElementById("btnOverview");
+  bindOnce(ob, "click", function(e){ e.preventDefault(); openOverview(); });
+
+  var oc=document.getElementById("btnOverviewClose");
+  bindOnce(oc, "click", function(e){ e.preventDefault(); e.stopPropagation(); closeOverview(); });
+
+  var op=document.getElementById("btnOverviewPrint");
+  bindOnce(op, "click", function(e){ e.preventDefault(); e.stopPropagation(); printOverview(); });
+
+  
+  // ✅ 안전장치: 동적/중복 바인딩 상황에서도 버튼이 무조건 동작하도록 이벤트 위임
+  document.addEventListener("click", function(ev){
+    var t = ev.target;
+    if(!t) return;
+    if(t.id === "btnOverviewClose"){
+      ev.preventDefault(); ev.stopPropagation(); if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+      closeOverview();
+    } else if(t.id === "btnOverviewPrint"){
+      ev.preventDefault(); ev.stopPropagation(); if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+      printOverview();
+    }
+  });
+
+var modal=document.getElementById("overviewModal");
+  if(modal){
+    // 배경 클릭 시 닫기
+    bindOnce(modal, "click", function(e){
+      if(e.target===modal) closeOverview();
+    });
+  }
+
+  // ESC로 닫기(모달이 열려있을 때만)
+  bindOnce(document, "keydown", function(e){
+    if(e.key==="Escape"){
+      var m=document.getElementById("overviewModal");
+      if(m && !m.classList.contains("hidden")) closeOverview();
+    }
+  });
+
+  loadSheet(0);
+}
+// DOM이 모두 만들어진 뒤에 바인딩되도록 변경(v66)
+window.addEventListener("DOMContentLoaded", main);
+</script>
+
+<!-- ===== 전체 확인 모달 ===== -->
+<div id="overviewModal" class="ovl hidden" aria-hidden="true">
+  <div class="ovCard" role="dialog" aria-modal="true" aria-labelledby="overviewTitle">
+    <div class="ovHead">
+      <div>
+        <div class="muted">전체 선택/입력 요약</div>
+        <div id="overviewTitle" class="title">전체 확인</div>
+      </div>
+      <div class="ovActions">
+        <span id="overviewStats" class="ovBadge">-</span>
+        <button id="btnOverviewPrint">인쇄</button>
+        <button id="btnOverviewClose">닫기</button>
+      </div>
+    </div>
+    <div class="ovBody">
+      <div class="note" style="margin-bottom:10px">
+        • 이 화면은 <b>모든 시트의 선택/수량/금액</b>을 한 번에 보여줍니다. (합계 제외 규칙은 기존과 동일)
+      </div>
+      <table class="ovTable">
+        <thead>
+          <tr>
+            <th style="width:110px">시트</th>
+            <th style="width:140px">중분류</th>
+            <th>선택 항목</th>
+            <th class="num" style="width:110px">단가/금액</th>
+            <th class="num" style="width:90px">수량</th>
+            <th class="num" style="width:120px">금액</th>
+            <th style="width:70px">관리</th>
+          </tr>
+        </thead>
+        <tbody id="overviewBody"></tbody>
+      </table>
+      <div style="height:10px"></div>
+      <div class="row" style="justify-content:flex-end">
+        <div class="pill">전체 합계: <b id="overviewGrand">0</b> 원</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
