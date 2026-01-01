@@ -94,6 +94,65 @@
 }
 .sumPills .pill{white-space:nowrap;}
 
+
+/* [v61] workArea 이동(모바일 최하단) */
+.workArea{margin-top:12px;}
+@media (max-width: 900px){
+  #workArea{padding:12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;}
+}
+
+/* ===== [v62] 모바일 Footer 작업영역(진짜 최하단 고정) ===== */
+@media (max-width: 900px){
+  /* workArea가 bottom placeholder로 이동했을 때 footer처럼 고정 */
+  #workArea.isMobileFooter{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    z-index:9998;
+    margin:0;
+    border-radius:0;
+    border-left:none;
+    border-right:none;
+    border-bottom:none;
+    box-shadow:0 -6px 18px rgba(0,0,0,.08);
+    background:#fff;
+    max-width:980px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  /* workArea 내부 여백/버튼 정리 */
+  #workArea.isMobileFooter .row{
+    justify-content:space-between;
+    gap:8px;
+  }
+  #workArea.isMobileFooter .row button{
+    flex:1;
+    white-space:nowrap;
+  }
+  #workArea.isMobileFooter .muted{
+    display:none; /* 모바일 footer에서는 안내문 숨김(공간 확보) */
+  }
+
+  /* footer가 화면을 덮지 않도록 하단 여백 확보 */
+  main{ padding-bottom:120px !important; }
+  #workFooterSpacer{ height:120px; }
+
+  /* 모바일에서는 옵션 토글 버튼 1개만(우측 패널) 사용 */
+  #btnToggleOptions{ display:none !important; }
+}
+
+
+/* ===== [v62F] 모바일 선택목록(테이블) 칸 좁아짐 방지 ===== */
+@media (max-width: 900px){
+  /* 선택목록 테이블은 가로 스크롤로 확보(열이 찌그러지지 않게) */
+  .pickedListWrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .pickedListWrap table{ min-width: 760px; table-layout: fixed; }
+  /* 기본 줄바꿈/깨짐 제어 */
+  .pickedListWrap th, .pickedListWrap td{ word-break: keep-all; }
+  /* 선택 항목(2번째 컬럼)은 줄바꿈 허용, 나머지는 한 줄 우선 */
+  .pickedListWrap td:nth-child(2){ white-space: normal; }
+  .pickedListWrap td:not(:nth-child(2)){ white-space: nowrap; }
+}
+
 </style>
 </head>
 <body>
@@ -113,7 +172,9 @@
     <div class="label">검색(중분류/소분류)</div>
     <input id="q" placeholder="예: 대리석, 상부장, 입수전, 기타..." />
 
-    <div class="label">작업</div>
+    <div id="workPlaceholderSidebar"></div>
+<div id="workArea" class="workArea">
+<div class="label">작업</div>
     <div class="row">
       <button id="btnResetSheet">이 시트 입력 초기화</button>
       <button id="btnResetAll">전체 초기화</button>
@@ -123,7 +184,9 @@
     <div class="muted" style="margin-top:10px">
       * 저장은 이 PC/브라우저(localStorage)에 자동 반영됩니다.
     </div>
-  </aside>
+  
+</div>
+</aside>
 
   <main>
     <div class="stickySummary">
@@ -234,14 +297,59 @@
         </div>
 
       </div>
-      </div><!-- /midRightGrid -->
+        <div id="workPlaceholderBottom" style="margin-top:16px"></div>
+<div id="workFooterSpacer" class="hidden"></div>
+
+</div><!-- /midRightGrid -->
     </div>
   </main>
 </div>
 
 <script>
 
-/* ============================================================
+// ============================================================
+
+  // [v61] 작업(전체확인/전체초기화 등) 영역은 모바일에서는 화면 최하단으로 내려가야 합니다.
+  // - 데스크탑: 좌측 사이드바(기본 위치)
+  // - 모바일: 선택 결과/목록 아래(최하단)
+  function placeWorkArea(){
+    var wa = document.getElementById('workArea');
+    var sidebar = document.getElementById('workPlaceholderSidebar');
+    var bottom = document.getElementById('workPlaceholderBottom');
+    var spacer = document.getElementById('workFooterSpacer');
+    if(!wa || !sidebar || !bottom) return;
+
+    var isMobile = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
+
+    // B안: 모바일에서는 무조건 '선택 결과 이후(bottom)'에만 렌더
+    var target = isMobile ? bottom : sidebar;
+
+    if(wa.parentElement !== target){
+      target.appendChild(wa);
+    }
+
+    if(isMobile){
+      wa.classList.add('isMobileFooter');
+      if(spacer){ spacer.classList.remove('hidden'); }
+    }else{
+      wa.classList.remove('isMobileFooter');
+      if(spacer){ spacer.classList.add('hidden'); }
+    }
+  }
+  // 간단 debounce (resize 과다 호출 방지)
+  function debounce(fn, wait){
+    var t;
+    return function(){
+      clearTimeout(t);
+      var args = arguments;
+      t = setTimeout(function(){ fn.apply(null, args); }, wait || 120);
+    };
+  }
+  var _placeWorkAreaDebounced = debounce(placeWorkArea, 120);
+  window.addEventListener('resize', _placeWorkAreaDebounced);
+  document.addEventListener('DOMContentLoaded', placeWorkArea);
+
+/*
    2025 셀프 견적 (단일 HTML) - var 버전 v39
    ------------------------------------------------------------
    구조 요약
@@ -255,7 +363,8 @@
       - 일반: 금액 = 단가(unit) × 수량(qty)
       - 수동(기타): 단가를 사용자가 입력
       - 연동(예: 상부장>주방 후드): 단가 = (기존 화면의 단가×기존 수량)
-   ============================================================ */
+   // =============================================================*/
+
 // =============================================================
 //  2025 셀프 견적 (단일 HTML)
 //  - 엑셀 내용을 BOOK(JSON)으로 내장
