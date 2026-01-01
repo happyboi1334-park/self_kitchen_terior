@@ -25,7 +25,7 @@
   .listbtn.done{background:#ecfdf5;border-color:#10b981}
   .groupTitle{margin-top:10px;padding:6px 8px;border-radius:10px;background:#f9fafb;border:1px solid #e5e7eb;font-size:12px;color:#374151}
   .card{border:1px solid #e5e7eb;border-radius:14px;padding:12px}
-  .grid2{display:grid;grid-template-columns:1.6fr 1fr;gap:12px}
+  .grid2{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;align-items:start}
   table{border-collapse:collapse;width:100%}
   th,td{border:1px solid #e5e7eb;padding:8px 10px;font-size:13px;vertical-align:top}
   th{background:#f9fafb;text-align:left}
@@ -77,6 +77,23 @@
   th,td{font-size:12.5px}
   button{padding:10px 12px}
 }
+
+#optionsArea.hidden{display:none !important;}
+
+/* ✅ 옵션 목록 접힘 시(수평) : 가운데 카드 숨기고 우측을 풀폭 */
+.grid2.optCollapsed{grid-template-columns:1fr !important;}
+#optionsCard.hidden{display:none !important;}
+
+/* 합계 표시 */
+.sumPills{
+  margin-left:auto;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.sumPills .pill{white-space:nowrap;}
+
 </style>
 </head>
 <body>
@@ -110,30 +127,24 @@
 
   <main>
     <div class="stickySummary">
-      <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <div>
-          <div class="muted">현재 대분류</div>
-          <div id="curSheet" style="font-weight:700"></div>
-        </div>
-        <div class="row">
-          <div class="pill">시트 합계: <b id="sheetTotal">0</b></div>
-          <div class="pill">전체 합계: <b id="grandTotal">0</b></div>
-        </div>
-      </div>
-    </div>
+  <div class="card" style="margin-bottom:12px;">
+    <div class="muted">현재 대분류</div>
+    <div id="curSheet" style="font-weight:700;">-</div>
+  </div>
 
-    </div>
-
-    <div style="height:12px"></div>
-
-    <div class="grid2">
-      <div class="card">
-        <div class="muted">현재 중분류</div>
-        <div id="curSection" style="font-weight:700;margin-bottom:10px"></div>
-
-        <div id="optionsArea">
-          <table>
+      <div class="grid2" id="midRightGrid">
+      <div class="card" id="optionsCard">
+<div class="muted">현재 중분류</div>
+<div class="row" style="justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px">
+  <div id="curSection" style="font-weight:700"></div>
+  <div class="sumPills" aria-label="합계">
+    <span class="pill">시트 합계: <b id="sheetTotal">0</b>원</span>
+    <span class="pill">전체 합계: <b id="grandTotal">0</b>원</span>
+  </div>
+  <button id="btnToggleOptions" class="btnToggleOptions" type="button" style="padding:8px 12px;border-radius:999px">옵션 목록 숨기기 ◀</button>
+</div>
+<div id="optionsArea">
+<table>
             <thead>
               <tr>
                 <th style="width:54px">선택</th>
@@ -151,7 +162,15 @@
       </div>
 
       <div class="card">
-        <div class="muted">선택 결과</div>
+        <div class="row" style="justify-content:space-between;align-items:center;gap:10px">
+  <div id="rightTopBar" class="row" style="justify-content:space-between;align-items:center;gap:10px">
+  <div>
+    <div class="muted">선택 결과</div>
+    <div class="muted" style="margin-top:4px">현재 중분류: <span id="curSectionR" style="font-weight:700"></span></div>
+  </div>
+  <button id="btnToggleOptionsRight" class="btnToggleOptions" type="button" style="padding:8px 12px;border-radius:999px">옵션 목록 보기 ▶</button>
+</div>
+</div>
         <div id="picked" style="font-weight:700;margin:6px 0 10px">-</div>
 
         
@@ -215,6 +234,7 @@
         </div>
 
       </div>
+      </div><!-- /midRightGrid -->
     </div>
   </main>
 </div>
@@ -338,6 +358,64 @@ function fmtWon(n){
   return Math.round(n).toLocaleString("ko-KR");
 }
 
+// ✅ 가운데(옵션 표) 접기/펼치기 토글 (Q1: 우측 패널 버튼)
+function setOptionsCollapsed(collapsed){
+  var card=document.getElementById("optionsCard");
+  var grid=document.getElementById("midRightGrid");
+  if(!grid) return;
+
+  if(collapsed){
+    if(card) card.classList.add("hidden");
+    grid.classList.add("optCollapsed");
+  }else{
+    if(card) card.classList.remove("hidden");
+    grid.classList.remove("optCollapsed");
+  }
+
+  var labelR = collapsed ? "옵션 목록 보기 ▶" : "옵션 목록 숨기기 ◀";
+  var labelM = labelR; // 동일 문구
+  var btnR=document.getElementById("btnToggleOptionsRight");
+  var btnM=document.getElementById("btnToggleOptions");
+  if(btnR) btnR.textContent = labelR;
+  if(btnM) btnM.textContent = labelM;
+
+  try{ localStorage.setItem("SELF_UI_OPT_COLLAPSED", collapsed ? "1" : "0"); }catch(e){}
+}
+
+function bindToggleBtns(){
+  // 기본값: 펼침(옵션 보임). localStorage 값이 있으면 그 값을 따름.
+  var defaultCollapsed = false;
+
+  var btns = Array.from(document.querySelectorAll(".btnToggleOptions"));
+  btns.forEach(function(btn){
+    if(!btn || btn._bound) return;
+    btn.addEventListener("click", function(e){
+      e.preventDefault();
+      var card=document.getElementById("optionsCard");
+      var isHidden = !!(card && card.classList.contains("hidden"));
+      setOptionsCollapsed(!isHidden);
+    });
+    btn._bound = true;
+  });
+}
+
+
+// ✅ 수동 입력 모드 전환: 단가 표시(pill) ↔ 단가 입력(input)
+function setManualMode(isManual){
+  var fixed=document.getElementById("unitModeFixed");
+  var inp=document.getElementById("unitInput");
+  if(!fixed || !inp) return;
+  if(isManual){
+    fixed.classList.add("hidden");
+    inp.classList.remove("hidden");
+    inp.disabled = false;
+  }else{
+    fixed.classList.remove("hidden");
+    inp.classList.add("hidden");
+    inp.disabled = true;
+  }
+}
+
 
 // ============================================================
 // ✅ (B안) 우측 패널에서 옵션을 select로 고르고, (멀티는) [추가/해제]로 선택
@@ -400,8 +478,18 @@ function renderOptSelect(){
     opt.value = o.name;
     // 모바일/PC 모두 보기 좋게 "옵션명 · 단가/금액" 표시
     var price = (o && o.unit!=null) ? Number(o.unit||0) : 0;
-    if(o && o.manual) price = 0;
-    opt.textContent = o.name + (o.manual ? " · 수동 입력" : (" · " + fmtWon(price)));
+    var isManual = !!(o && o.manual);
+    // ✅ 오른쪽(싱크대 세부)은 표에 표시되는 금액이 LINK_RULES/대리석 연동 등으로 "계산"되는 값이다.
+    //    드롭다운도 동일한 계산값을 보여주도록 calcRightItem을 사용한다.
+    if(sec && sec.tag==="오른쪽"){
+      try{
+        var r = calcRightItem(sec, o.name, price, isManual);
+        if(r && typeof r.unit==="number") price = r.unit;
+        if(r && r.manual===true) isManual = true;
+      }catch(e){}
+    }
+    if(isManual) price = 0;
+    opt.textContent = o.name + (isManual ? " · 수동 입력" : (" · " + fmtWon(price)));
     selEl.appendChild(opt);
   }
 
@@ -1086,6 +1174,88 @@ function updateRightPanel(){
   var qtyEl=document.getElementById("qty");
   var amtEl=document.getElementById("amount");
 
+  // ============================================================
+  // ✅ 입력값(단가/수량)을 state.saved(pick)에 즉시 반영하고,
+  //    선택 목록/금액/합계를 실시간 갱신한다.
+  //  - 특히 '기타(수동 입력)'은 여기서 pick.unit 갱신이 필수.
+  // ============================================================
+  if(unitInput && !unitInput._bound){
+    unitInput.addEventListener("input", function(){
+      try{
+        var sec = state.sectionsCache[state.sectionIndex];
+        if(!sec) return;
+
+        var p = getPick(sec.name) || {};
+        var isSinkRight = (sec.tag==="오른쪽");
+        var isMulti = !!sec.multi || isSinkRight;
+
+        var u = Number(this.value || 0);
+
+        if(isMulti && p.multi && p.items){
+          var act = (state.rightActive && state.rightActive.section===sec.name) ? state.rightActive.opt : null;
+          if(!act) act = Object.keys(p.items)[0];
+          if(act){
+            p.items[act] = p.items[act] || {unit:0, qty:0};
+            p.items[act].unit = u;
+          }
+        }else{
+          p.unit = u;
+        }
+
+        setPick(sec.name, p);
+
+        // 금액/합계 즉시 갱신(포커스 유지)
+        var q = Number((document.getElementById("qty")||{}).value || 0);
+        amtEl.textContent = fmtWon(u * q);
+        computeTotals();
+        renderPickedList();
+      }catch(e){}
+    });
+    unitInput._bound = true;
+  }
+
+  if(qtyEl && !qtyEl._bound){
+    qtyEl.addEventListener("input", function(){
+      try{
+        var sec = state.sectionsCache[state.sectionIndex];
+        if(!sec) return;
+
+        var p = getPick(sec.name) || {};
+        var isSinkRight = (sec.tag==="오른쪽");
+        var isMulti = !!sec.multi || isSinkRight;
+
+        var q = Number(this.value || 0);
+
+        if(isMulti && p.multi && p.items){
+          var act = (state.rightActive && state.rightActive.section===sec.name) ? state.rightActive.opt : null;
+          if(!act) act = Object.keys(p.items)[0];
+          if(act){
+            p.items[act] = p.items[act] || {unit:0, qty:0};
+            p.items[act].qty = q;
+          }
+        }else{
+          p.qty = q;
+          p.qtyRaw = String(this.value||"");
+        }
+
+        setPick(sec.name, p);
+
+        var u = 0;
+        // 수동 입력이면 input 값 우선, 아니면 pick/unit 표시값 사용
+        if(!unitInput.classList.contains("hidden")){
+          u = Number(unitInput.value||0);
+        }else{
+          u = Number(p.unit||0);
+        }
+
+        amtEl.textContent = fmtWon(u * q);
+        computeTotals();
+        renderPickedList();
+      }catch(e){}
+    });
+    qtyEl._bound = true;
+  }
+
   // ✅ 중분류 타입에 따라 수량 입력 가이드/키패드 힌트 변경
   var allowDecimal = (section && section.tag === "오른쪽");
   qtyEl.setAttribute("inputmode", allowDecimal ? "decimal" : "numeric");
@@ -1209,7 +1379,16 @@ qtyEl.readOnly = false;
   if(!isFinite(qtyNum)) qtyNum = (pick.qty!=null ? Number(pick.qty) : 0);
 
   amtEl.textContent = fmtWon((Number(pick.unit)||0) * qtyNum);
-  renderManualHint(manual);
+    // ✅ (수동입력) 단가 입력칸 노출/숨김 및 값 동기화
+  setManualMode(manual);
+  if(manual){
+    var u = Number(pick.unit||0);
+    unitInput.value = (u && isFinite(u) ? String(u) : "");
+    try{ unitInput.focus(); unitInput.select && unitInput.select(); }catch(e){}
+  }else{
+    unitInput.value = "";
+  }
+renderManualHint(manual);
 
   // ✅ (B안) 선택상태 변화 반영
   renderOptSelect();
@@ -1226,6 +1405,7 @@ function renderOptions(){
 
   document.getElementById("curSheet").textContent=sheet.name;
   document.getElementById("curSection").textContent=section.name;
+  var _csr=document.getElementById("curSectionR"); if(_csr) _csr.textContent = section.name;
 
   setPriceHeader(section);
 
@@ -1541,6 +1721,8 @@ function renderOptions(){
 
   // ✅ (B안) 우측 옵션 select 동기화
   renderOptSelect();
+  try{bindToggleBtns();}catch(e){}
+  try{bindToggleBtns();}catch(e){}
 }
 
 /* computeTotals()
@@ -1867,6 +2049,40 @@ function onSearchChanged(){
 
 function wire(){
   document.getElementById("q").addEventListener("input", onSearchChanged);
+
+  // ✅ (Q1) 옵션 목록(가운데 표) 접기/펼치기 - 우측 패널 버튼
+  (function(){
+    var btn=document.getElementById("btnToggleOptions");
+    if(!btn) return;
+
+    // 기본값: 모바일은 접힘, PC는 펼침 (단, 사용자가 저장한 값이 있으면 우선)
+    var collapsed = false;
+    try{
+      var saved = localStorage.getItem("SELF_UI_OPT_COLLAPSED");
+      if(saved==="1") collapsed = true;
+      else if(saved==="0") collapsed = false;
+      else collapsed = true;
+    }catch(e){
+      collapsed = true;
+    }
+
+    setOptionsCollapsed(collapsed);
+
+            bindToggleBtns();
+bindToggleBtns();
+btn.addEventListener("click", function(e){
+      e.preventDefault();
+      var area=document.getElementById("optionsArea");
+      var isHidden = !!(area && area.classList.contains("hidden"));
+      setOptionsCollapsed(!isHidden);
+
+      // 펼친 경우(보이게 된 경우) 옵션 영역으로 스크롤
+      if(isHidden){
+        try{ area.scrollIntoView({behavior:"smooth", block:"start"}); }catch(err){}
+      }
+    });
+  })();
+
 
   // ⛔ 기존(옵션 먼저 선택) : 소수점 키 입력 자체 차단
   document.getElementById("qty").addEventListener("keydown", function(e){
