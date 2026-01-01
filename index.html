@@ -2234,8 +2234,13 @@ function printOverview(){
   html.push('window.onafterprint=function(){ try{ window.close(); }catch(e){} };');
   html.push('window.onload=function(){ setTimeout(function(){ try{ window.focus(); window.print(); }catch(e){} }, 50); };');
   html.push('</'+'script>');
-  html.push("<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}</script>"); 
-  html.push('</body></html>');
+  // 인쇄 완료 후 자동 닫기 스크립트
+  html.push("<script>window.onafterprint=function(){try{window.close()}catch(e){}};window.onload=function(){setTimeout(function(){try{window.focus();window.print()}catch(e){}},50)};</script>");
+  // ❌ 서비스워커 관련 html.push 전부 제거
+  // 문서 닫기
+  html.push("</body></html>");
+
+
 
   var w = window.open("", "_blank");
   if(!w){
