@@ -68,13 +68,6 @@
   .ovSub{background:#fafafa;font-weight:700}
 
 </style>
-
-<meta name="theme-color" content="#111827"/>
-<link rel="manifest" href="manifest.json"/>
-<link rel="apple-touch-icon" href="icons/icon-192.png"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-
 </head>
 <body>
 <header>
@@ -2234,11 +2227,8 @@ function printOverview(){
   html.push('window.onafterprint=function(){ try{ window.close(); }catch(e){} };');
   html.push('window.onload=function(){ setTimeout(function(){ try{ window.focus(); window.print(); }catch(e){} }, 50); };');
   html.push('</'+'script>');
-  // ❌ 서비스워커 관련 html.push 전부 제거
-  // 문서 닫기
-  html.push("</body></html>");
 
-
+  html.push('</body></html>');
 
   var w = window.open("", "_blank");
   if(!w){
