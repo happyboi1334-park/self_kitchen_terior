@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>2025 셀프 견적 (단일 파일 · var 버전 v61)</title>
+<title>키친테리어 셀프 견적</title>
 <style>
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;color:#111827}
   header{padding:12px 16px;border-bottom:1px solid #e5e7eb;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
@@ -157,8 +157,7 @@
 </head>
 <body>
 <header>
-  <h1>2025 셀프 견적 (더블클릭 실행 · var 버전 v61)</h1>
-  <span class="muted">• 싱크대: “기존(옵션 먼저 선택)” + “싱크대 세부(상부장/하부장/대리석/옵션)” 함께 표시 • 검색 정상 동작 • 수량 step=0.001</span>
+  <h1>키친테리어 셀프 견적</h1>
 </header>
 
 <div class="wrap">
@@ -1366,7 +1365,12 @@ function updateRightPanel(){
   }
 
   // ✅ 중분류 타입에 따라 수량 입력 가이드/키패드 힌트 변경
-  var allowDecimal = (section && section.tag === "오른쪽");
+  var allowDecimal = true; // [v62J] 기본: 소수(3자리) 허용
+      // 단, 대분류(시트) '싱크대'는 정수만 허용
+      try{
+        var sheetName = (document.getElementById('curSheet') ? document.getElementById('curSheet').textContent.trim() : '');
+        if(sheetName === '싱크대') allowDecimal = false;
+      }catch(e){}
   qtyEl.setAttribute("inputmode", allowDecimal ? "decimal" : "numeric");
   qtyEl.setAttribute("placeholder", allowDecimal ? "예: 2.345" : "예: 3");
 
@@ -2193,50 +2197,25 @@ btn.addEventListener("click", function(e){
   })();
 
 
-  // ⛔ 기존(옵션 먼저 선택) : 소수점 키 입력 자체 차단
+  // ✅ [v62I] 수량 입력: 소수점(최대 3자리) 허용
   document.getElementById("qty").addEventListener("keydown", function(e){
-    var section=state.sectionsCache[state.sectionIndex];
-    if(!section) return;
-    if(section.tag !== "오른쪽"){
-      if(e.key === "." || e.key === "," ){
-        e.preventDefault();
-        return false;
-      }
-    }
+    // 여기서는 키 입력 자체를 막지 않는다.
+    // 실제 허용/정규화(소수 3자리)는 아래 input 핸들러에서 처리한다.
   });
 
-  // ⛔ 기존(옵션 먼저 선택): 숫자 키 외 모든 키 입력 차단 (문자/점/기호 전부 금지)
+// ✅ [v62I] 수량 입력: 키 입력 차단 제거(소수/붙여넣기/이동키 모두 허용)
   document.getElementById("qty").addEventListener("keydown", function(e){
-    var section = state.sectionsCache[state.sectionIndex];
-    if(!section) return;
-
-    if(section.tag !== "오른쪽"){
-      // 허용 키: 숫자, 백스페이스, 삭제, 화살표, 탭
-      var allowed =
-        (e.key >= '0' && e.key <= '9') ||
-        e.key === 'Backspace' ||
-        e.key === 'Delete' ||
-        e.key === 'ArrowLeft' ||
-        e.key === 'ArrowRight' ||
-        e.key === 'Tab';
-
-      if(!allowed){
-        e.preventDefault();
-        return false;
-      }
-    }
+    // 차단하지 않음. input 이벤트에서 값 정규화.
   });
 
-
-
-  // ✅ 수량 입력 즉시 반영 (입력중에도 금액/합계 갱신)
+// ✅ 수량 입력 즉시 반영 (입력중에도 금액/합계 갱신)
   document.getElementById("qty").addEventListener("input", function(){
     var section=state.sectionsCache[state.sectionIndex];
     if(!section) return;
     var pick=getPick(section.name);
     if(!pick) return;
 
-    var allowDecimal = (section && section.tag === "오른쪽");
+    var allowDecimal = true; // [v62H] 대분류 제외 요청: 대부분 수량 입력 소수 허용
     var raw = this.value || "";
 
     // 오른쪽 멀티 활성 항목 여부
@@ -2264,10 +2243,25 @@ btn.addEventListener("click", function(e){
       if(parts.length>2){
         raw = parts[0] + '.' + parts.slice(1).join('');
       }
+      
+      // [v62H] 소수점 3자리까지만 허용(입력 단계에서 잘라냄)
+      parts = raw.split('.');
+      if(parts.length===2 && parts[1].length>3){
+        raw = parts[0] + '.' + parts[1].slice(0,3);
+      }
       this.value = raw;
+      // [v62J] 싱크대는 정수만 유지
+      if(!allowDecimal){ this.value = String(this.value||'').replace(/\D/g,''); }
+
 
       var f = parseFloat(raw);
       var qtyVal2 = (isFinite(f) ? f : 0);
+      // [v62H] 내부 값도 3자리로 정규화
+      if(allowDecimal){
+        qtyVal2 = Math.round(qtyVal2 * 1000) / 1000;
+      }else{
+        qtyVal2 = Math.floor(qtyVal2);
+      }
 
       if(isActiveMulti){
         pick.items[state.rightActive.opt].qtyRaw = raw;
@@ -2289,7 +2283,7 @@ document.getElementById("qty").addEventListener("blur", function(){
     var pick=getPick(section.name);
     if(!pick) return;
 
-    var allowDecimal = (section && section.tag === "오른쪽");
+    var allowDecimal = true; // [v62H] 대분류 제외 요청: 대부분 수량 입력 소수 허용
     var raw = this.value || "";
 
     // ✅ checkbox 멀티(오른쪽): pick.qty가 아니라 '활성 항목(it)'의 qty/qtyRaw를 갱신해야 함
@@ -2314,6 +2308,8 @@ document.getElementById("qty").addEventListener("blur", function(){
       this.value = raw;
       var f = parseFloat(raw);
       var qtyVal2 = (isFinite(f) ? f : 0);
+      // [v62H] 내부 값도 3자리로 정규화
+      qtyVal2 = Math.round(qtyVal2 * 1000) / 1000;
 
       if(isActiveMulti){
         pick.items[state.rightActive.opt].qtyRaw = raw;
@@ -2795,6 +2791,62 @@ var modal=document.getElementById("overviewModal");
 }
 // DOM이 모두 만들어진 뒤에 바인딩되도록 변경(v66)
 window.addEventListener("DOMContentLoaded", main);
+
+// ===== [v62J] 선택목록 수량 input: 싱크대는 정수만, 그 외는 소수 3자리 =====
+document.addEventListener('input', function(e){
+  var el = e.target;
+  if(!el) return;
+  if(!(el.closest && el.closest('.pickedListWrap'))) return;
+  if(el.tagName !== 'INPUT') return;
+
+  var sheetName = '';
+  try{ sheetName = (document.getElementById('curSheet') ? document.getElementById('curSheet').textContent.trim() : ''); }catch(_e){}
+
+  if(sheetName === '싱크대'){
+    el.setAttribute('step','1');
+    el.value = String(el.value||'').replace(/\D/g,'');
+  }else{
+    el.setAttribute('step','0.001');
+    var raw = String(el.value||'').replace(/[^0-9.]/g,'');
+    var parts = raw.split('.');
+    if(parts.length>2) raw = parts[0]+'.'+parts.slice(1).join('');
+    if(parts.length===2 && parts[1].length>3) raw = parts[0]+'.'+parts[1].slice(0,3);
+    el.value = raw;
+  }
+});
+
+
+// ===== [v62K] 싱크대 시트: 수량 완전 정수만 허용 (입력/붙여넣기/키다운 차단) =====
+document.addEventListener('keydown', function(e){
+  var el = e.target;
+  if(!el || el.id !== 'qty') return;
+  var sheetName = '';
+  try{ sheetName = (document.getElementById('curSheet') ? document.getElementById('curSheet').textContent.trim() : ''); }catch(_e){}
+  if(sheetName !== '싱크대') return;
+
+  // 허용: 숫자, 백스페이스, 삭제, 방향키, 탭
+  var allowed = (
+    (e.key >= '0' && e.key <= '9') ||
+    e.key === 'Backspace' || e.key === 'Delete' ||
+    e.key === 'ArrowLeft' || e.key === 'ArrowRight' ||
+    e.key === 'Tab'
+  );
+  if(!allowed){
+    e.preventDefault();
+  }
+});
+
+document.addEventListener('input', function(e){
+  var el = e.target;
+  if(!el || el.id !== 'qty') return;
+  var sheetName = '';
+  try{ sheetName = (document.getElementById('curSheet') ? document.getElementById('curSheet').textContent.trim() : ''); }catch(_e){}
+  if(sheetName !== '싱크대') return;
+
+  // 붙여넣기/IME 등 모든 경우에 정수만 남김
+  el.value = String(el.value || '').replace(/\\D/g,'');
+});
+
 </script>
 
 <!-- ===== 전체 확인 모달 ===== -->
